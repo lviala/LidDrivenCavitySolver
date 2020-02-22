@@ -13,8 +13,8 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm) {
     // Specify allowed options
     desc.add_options()
         ("help" , "Produce help message.")
-        ("Lx" , po::value<int>() -> default_value(1)         , "Length of the domain in the x-direction.")
-        ("Ly" , po::value<int>() -> default_value(1)         , "Length of the domain in the y-direction.")
+        ("Lx" , po::value<double>() -> default_value(1.0)    , "Length of the domain in the x-direction.")
+        ("Ly" , po::value<double>() -> default_value(1.0)    , "Length of the domain in the y-direction.")
         ("Nx" , po::value<int>() -> default_value(161)       , "Number of grid points in x-direction.")
         ("Ny" , po::value<int>() -> default_value(161)       , "Number of grid points in y-direction.")
         ("Px" , po::value<int>() -> default_value(1)         , "Number of partitions in x-direction.")
@@ -44,7 +44,7 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm) {
 
 void LDCset_solver(LidDrivenCavity* solver , po::variables_map& vm) {
 
-    solver -> SetDomainSize(vm["Lx"].as<int>() , vm["Ly"].as<int>() );
+    solver -> SetDomainSize(vm["Lx"].as<double>() , vm["Ly"].as<double>() );
     solver -> SetGridSize(vm["Nx"].as<int>() , vm["Ny"].as<int>() );
     solver -> SetTimeStep(vm["dt"].as<double>() );
     solver -> SetFinalTime(vm["T"].as<double>() );

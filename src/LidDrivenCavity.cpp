@@ -8,6 +8,7 @@ LidDrivenCavity::~LidDrivenCavity()
 {
 }
 
+// Setters **************************************************
 void LidDrivenCavity::SetDomainSize(double Lx, double Ly)
 {
     this -> Lx = Lx;
@@ -35,6 +36,35 @@ void LidDrivenCavity::SetReynoldsNumber(double Re)
     this -> Re = Re;
 }
 
+// Getters **************************************************
+void LidDrivenCavity::getDomainSize(double* domainSize)
+{
+    domainSize[0] = this -> Lx;
+    domainSize[1] = this -> Ly;
+}
+
+void LidDrivenCavity::getGridSize(int* gridSize)
+{
+    gridSize[0] = this -> Nx;
+    gridSize[1] = this -> Ny;
+}
+
+void LidDrivenCavity::getTimeStep(double& dt)
+{
+    dt = this -> dt;
+}
+
+void LidDrivenCavity::getFinalTime(double& T)
+{
+    T = this -> T;
+}
+
+void LidDrivenCavity::getReynoldsNumber(double& Re)
+{
+    Re = this -> Re;
+}
+
+// Solvers **************************************************
 void LidDrivenCavity::Initialise()
 {
 }
