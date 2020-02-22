@@ -9,10 +9,10 @@ public:
     LidDrivenCavity();
     ~LidDrivenCavity();
 
-    void SetDomainSize(double xlen, double ylen);
-    void SetGridSize(int nx, int ny);
-    void SetTimeStep(double deltat);
-    void SetFinalTime(double finalt);
+    void SetDomainSize(double Lx, double Ly);
+    void SetGridSize(int Nx, int Ny);
+    void SetTimeStep(double dt);
+    void SetFinalTime(double T);
     void SetReynoldsNumber(double Re);
 
     void Initialise();

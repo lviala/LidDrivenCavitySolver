@@ -2,5 +2,7 @@
 
 using namespace std;
 #include <boost/program_options.hpp>
+#include "LidDrivenCavity.h"
 
-void LDCprogram_options(int argc, char** argv, po::options_description& desc);
+int LDCprogram_options(int argc, char** argv, po::variables_map& vm);
+void LDCset_solver(LidDrivenCavity* solver , po::variables_map& vm);

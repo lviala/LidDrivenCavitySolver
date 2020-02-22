@@ -8,24 +8,31 @@ LidDrivenCavity::~LidDrivenCavity()
 {
 }
 
-void LidDrivenCavity::SetDomainSize(double xlen, double ylen)
+void LidDrivenCavity::SetDomainSize(double Lx, double Ly)
 {
+    this -> Lx = Lx;
+    this -> Ly = Ly; 
 }
 
-void LidDrivenCavity::SetGridSize(int nx, int ny)
+void LidDrivenCavity::SetGridSize(int Nx, int Ny)
 {
+    this -> Nx = Nx;
+    this -> Ny = Ny;
 }
 
-void LidDrivenCavity::SetTimeStep(double deltat)
+void LidDrivenCavity::SetTimeStep(double dt)
 {
+    this -> dt = dt;
 }
 
-void LidDrivenCavity::SetFinalTime(double finalt)
+void LidDrivenCavity::SetFinalTime(double T)
 {
+    this -> T = T;
 }
 
-void LidDrivenCavity::SetReynoldsNumber(double re)
+void LidDrivenCavity::SetReynoldsNumber(double Re)
 {
+    this -> Re = Re;
 }
 
 void LidDrivenCavity::Initialise()
