@@ -6,11 +6,15 @@ set(CMAKE_CXX_STANDARD 11)
 include(CTest)
 enable_testing()
 
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
+
 find_package(Boost COMPONENTS system iostreams iostreams system program_options REQUIRED)
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCprogram_options)
-TARGET_LINK_LIBRARIES( LidDrivenCavitySolver ${Boost_LIBRARIES} )
+TARGET_LINK_LIBRARIES( LidDrivenCavitySolver ${Boost_LIBRARIES} ${MPI_LIBRARIES})
+set_target_properties(LidDrivenCavitySolver PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
