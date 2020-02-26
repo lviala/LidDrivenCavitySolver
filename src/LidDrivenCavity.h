@@ -7,18 +7,18 @@ class LidDrivenCavity
 {
 public:
     // Constructors
-    LidDrivenCavity();
+    LidDrivenCavity(int rank, int* coords, int* gridSize, double dt, double T, double Re);
     ~LidDrivenCavity();
 
     // Setters
-    void SetDomainSize(double Lx, double Ly);
+    void SetCoords(int* coords);
     void SetGridSize(int Nx, int Ny);
     void SetTimeStep(double dt);
     void SetFinalTime(double T);
     void SetReynoldsNumber(double Re);
 
     // Getters
-    void getDomainSize(double* domainSize);
+    void getCoords(int* coords);
     void getGridSize(int* gridSize);
     void getTimeStep(double& dt);
     void getFinalTime(double& T);
@@ -28,9 +28,12 @@ public:
     void Initialise();
     void Integrate();
 
-    // Add any other public functions
-
 private:
+
+    // Contains coordinate of subdomain on cartesian grid
+    int coords[2];
+    int rank;
+
     double* v = nullptr;
     double* s = nullptr;
 
@@ -38,7 +41,5 @@ private:
     double T;
     int    Nx;
     int    Ny;
-    double Lx;
-    double Ly;
     double Re;
 };

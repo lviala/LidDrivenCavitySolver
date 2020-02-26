@@ -4,5 +4,6 @@
         "__functional_base": "cpp",
         "__locale": "cpp",
         "functional": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

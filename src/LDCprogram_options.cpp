@@ -7,7 +7,7 @@ namespace po = boost::program_options;
 #include <iterator>
 using namespace std;
 
-bool LDCprogram_options(int argc, char** argv, po::variables_map& vm) {
+bool LDCprogram_options(int argc, char** argv, po::variables_map& vm, int& rank) {
 
     po::options_description desc("Allowed options");
     // Specify allowed options
@@ -28,10 +28,12 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm) {
     
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
-        
+    
     // If the user gives the --help argument, print the help and quit.
     if (vm.count("help")) {
-        cout << desc << "\n";
+        if (rank == 0){
+            cout << desc << "\n";
+        }
         return true;
     }
     else // Return false, and proceed with rest of program
@@ -46,14 +48,15 @@ void LDCsetVar(po::variables_map& vm,
                     int* gridSize, int* partitionSize, double* domainSize, 
                     double& timeStep, double& finalTime, double& reynoldsNumber) {
 
-    gridSize[0] = vm["Nx"].as<int>();
-    gridSize[1] = vm["Ny"].as<int>();
+    // Note: working in column-major format: y-direction to be 0-direction
+    gridSize[1] = vm["Nx"].as<int>();
+    gridSize[0] = vm["Ny"].as<int>();
 
-    partitionSize[0] = vm["Px"].as<int>();
-    partitionSize[1] = vm["Py"].as<int>();
+    partitionSize[1] = vm["Px"].as<int>();
+    partitionSize[0] = vm["Py"].as<int>();
 
-    domainSize[0] = vm["Lx"].as<double>();
-    domainSize[1] = vm["Ly"].as<double>();
+    domainSize[1] = vm["Lx"].as<double>();
+    domainSize[0] = vm["Ly"].as<double>();
 
     timeStep = vm["dt"].as<double>();
     finalTime = vm["T"].as<double>();

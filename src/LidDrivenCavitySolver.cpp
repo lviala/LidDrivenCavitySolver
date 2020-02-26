@@ -8,12 +8,13 @@ namespace po = boost::program_options;
 
 #include "LDCprogram_options.h"
 #include "LidDrivenCavity.h"
-#include "LDCmngMPI.h"
-//namespace mngMPI = LDCmngMPI;
+#include "LDCmngMPI.h" // namespace mngMPI
 
 int main(int argc, char **argv)
 {   
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// INITIALIZE MPI, READ AND VALIDATE INPUTS
     // Initialize MPI
     MPI_Init(&argc, &argv);
 
@@ -29,11 +30,11 @@ int main(int argc, char **argv)
 
     // Read and parse program options from command line
     po::variables_map vm;
-    b_help = LDCprogram_options(argc , argv, vm);
+    b_help = LDCprogram_options(argc , argv, vm , rank);
 
     // If help is displayed, return 0 and exit
     if (b_help) {
-        cout << "Program complete with exit code 0" << endl;
+        if(rank == 0) cout << "Program complete with exit code 0" << endl;
         MPI_Finalize();
         return 0;
     }
@@ -55,8 +56,23 @@ int main(int argc, char **argv)
         return 0;
     }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// INITIALIZE SUBDOMAIN
+
+    // Initialize cartesian grid communicator
+    MPI_Comm cartGrid;
+    int periods[2] = {0, 0}, coords[2];
+    int dest, reorder = 0;
+    MPI_Cart_create(MPI_COMM_WORLD, 2, partitionSize, periods, reorder, &cartGrid);
+    MPI_Cart_coords(cartGrid, rank, 2, coords);
+
+    // Compute number of nodes assigned to subdomain
+    int subGridSize[2];
+    double subDomainSize[2];
+    mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize);
+
     // Create a new instance of the LidDrivenCavity class
-    LidDrivenCavity* solver = new LidDrivenCavity();
+    LidDrivenCavity* solver = new LidDrivenCavity(rank, coords, subGridSize, timeStep, finalTime, reynoldsNumber);
     
     // Initialize solver
     solver->Initialise();

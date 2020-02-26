@@ -1,19 +1,30 @@
 #include "LidDrivenCavity.h"
+#include <iostream>
 
-LidDrivenCavity::LidDrivenCavity()
-{
+LidDrivenCavity::LidDrivenCavity(int rank, int* coords, int* gridSize, double dt, double T, double Re)
+{   
+    this -> rank = rank;
+    this -> coords[0] = coords[0];
+    this -> coords[1] = coords[1];
+
+    this -> Nx = gridSize[1];
+    this -> Ny = gridSize[0];
+    
+    this -> dt = dt;
+    this -> T = T;
+    this -> Re = Re;
+
+    cout << "My rank is: " << this -> rank << endl; 
+    cout << "My Coordinates are: (" << this -> coords[0] << " , " << this -> coords[1] << ")" << endl;
+    cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << endl;
 }
 
 LidDrivenCavity::~LidDrivenCavity()
 {
 }
 
-// Setters **************************************************
-void LidDrivenCavity::SetDomainSize(double Lx, double Ly)
-{
-    this -> Lx = Lx;
-    this -> Ly = Ly; 
-}
+//////////////////////////////////////////////////////////////
+// SETTERS
 
 void LidDrivenCavity::SetGridSize(int Nx, int Ny)
 {
@@ -36,13 +47,20 @@ void LidDrivenCavity::SetReynoldsNumber(double Re)
     this -> Re = Re;
 }
 
-// Getters **************************************************
-void LidDrivenCavity::getDomainSize(double* domainSize)
+void LidDrivenCavity::SetCoords(int* coords)
 {
-    domainSize[0] = this -> Lx;
-    domainSize[1] = this -> Ly;
+    this -> coords[0] = coords[0];
+    this -> coords[1] = coords[1];
 }
 
+//////////////////////////////////////////////////////////////
+// GETTERS
+
+void LidDrivenCavity::getCoords(int* coords)
+{
+    coords[0] = this -> coords[0];
+    coords[1] = this -> coords[1];
+}
 void LidDrivenCavity::getGridSize(int* gridSize)
 {
     gridSize[0] = this -> Nx;
@@ -64,7 +82,8 @@ void LidDrivenCavity::getReynoldsNumber(double& Re)
     Re = this -> Re;
 }
 
-// Solvers **************************************************
+//////////////////////////////////////////////////////////////
+// SOLVERS
 void LidDrivenCavity::Initialise()
 {
 }
