@@ -42,12 +42,21 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm) {
 
 }
 
-void LDCset_solver(LidDrivenCavity* solver , po::variables_map& vm) {
+void LDCsetVar(po::variables_map& vm, 
+                    int* gridSize, int* partitionSize, double* domainSize, 
+                    double& timeStep, double& finalTime, double& reynoldsNumber) {
 
-    solver -> SetDomainSize(vm["Lx"].as<double>() , vm["Ly"].as<double>() );
-    solver -> SetGridSize(vm["Nx"].as<int>() , vm["Ny"].as<int>() );
-    solver -> SetTimeStep(vm["dt"].as<double>() );
-    solver -> SetFinalTime(vm["T"].as<double>() );
-    solver -> SetReynoldsNumber(vm["Re"].as<double>() );
+    gridSize[0] = vm["Nx"].as<int>();
+    gridSize[1] = vm["Ny"].as<int>();
+
+    partitionSize[0] = vm["Px"].as<int>();
+    partitionSize[1] = vm["Py"].as<int>();
+
+    domainSize[0] = vm["Lx"].as<double>();
+    domainSize[1] = vm["Ly"].as<double>();
+
+    timeStep = vm["dt"].as<double>();
+    finalTime = vm["T"].as<double>();
+    reynoldsNumber = vm["Re"].as<double>();
 
 }
