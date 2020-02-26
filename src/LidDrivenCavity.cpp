@@ -1,11 +1,15 @@
 #include "LidDrivenCavity.h"
 #include <iostream>
 
-LidDrivenCavity::LidDrivenCavity(int rank, int* coords, int* gridSize, double dt, double T, double Re)
+LidDrivenCavity::LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double T, double Re)
 {   
     this -> rank = rank;
     this -> coords[0] = coords[0];
     this -> coords[1] = coords[1];
+    this -> rankShift[0] = rankShift[0];
+    this -> rankShift[1] = rankShift[1];
+    this -> rankShift[2] = rankShift[2];
+    this -> rankShift[3] = rankShift[3];
 
     this -> Nx = gridSize[1];
     this -> Ny = gridSize[0];
@@ -16,6 +20,7 @@ LidDrivenCavity::LidDrivenCavity(int rank, int* coords, int* gridSize, double dt
 
     cout << "My rank is: " << this -> rank << endl; 
     cout << "My Coordinates are: (" << this -> coords[0] << " , " << this -> coords[1] << ")" << endl;
+    cout << "My Neighbors are: Down=" << rankShift[0] << "  -- Up =" << rankShift[1] << "  -- Left =" << rankShift[2] << "  -- Right =" << rankShift[3] << endl;
     cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << endl;
 }
 

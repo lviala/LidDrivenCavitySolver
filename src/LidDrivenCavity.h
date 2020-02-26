@@ -7,7 +7,7 @@ class LidDrivenCavity
 {
 public:
     // Constructors
-    LidDrivenCavity(int rank, int* coords, int* gridSize, double dt, double T, double Re);
+    LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double T, double Re);
     ~LidDrivenCavity();
 
     // Setters
@@ -32,6 +32,9 @@ private:
 
     // Contains coordinate of subdomain on cartesian grid
     int coords[2];
+    // rankShift[0] = rank of process below - rankShift[1] = rank of process above
+    // rankShift[2] = rank of process left - rankShift[3] = rank of process right 
+    int rankShift[4];
     int rank;
 
     double* v = nullptr;

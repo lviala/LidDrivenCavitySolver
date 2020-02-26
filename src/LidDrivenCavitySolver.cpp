@@ -66,13 +66,18 @@ int main(int argc, char **argv)
     MPI_Cart_create(MPI_COMM_WORLD, 2, partitionSize, periods, reorder, &cartGrid);
     MPI_Cart_coords(cartGrid, rank, 2, coords);
 
+    int rankShift[4] = {rank,rank,rank,rank};
+    MPI_Cart_shift(cartGrid, 0, 1, &rankShift[0], &rankShift[1]);
+    MPI_Cart_shift(cartGrid, 1, 1, &rankShift[2], &rankShift[3]);
+
+
     // Compute number of nodes assigned to subdomain
     int subGridSize[2];
     double subDomainSize[2];
     mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize);
 
     // Create a new instance of the LidDrivenCavity class
-    LidDrivenCavity* solver = new LidDrivenCavity(rank, coords, subGridSize, timeStep, finalTime, reynoldsNumber);
+    LidDrivenCavity* solver = new LidDrivenCavity(rank, rankShift, coords, subGridSize, timeStep, finalTime, reynoldsNumber);
     
     // Initialize solver
     solver->Initialise();
