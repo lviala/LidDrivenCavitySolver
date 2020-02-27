@@ -98,7 +98,7 @@ void LidDrivenCavity::getReynoldsNumber(double& Re)
 void LidDrivenCavity::Initialise()
 {
     // Compute the necessary overlap required between subdomains
-    // Based on neighbor of cartesian subgrid
+    // Based on neighbors of cartesian subgrid
     // rankShift[i] = -2 indicates MPI_PROC_NULL
 
     if (rankShift[0] != -2){
@@ -131,14 +131,14 @@ void LidDrivenCavity::UpdateGlobalBcs(){
     // Domain on bottom of cavity if rankshift[0] = -2
     if (rankShift[0] == -2){
         for (int i = 0; i < this -> Nx ; i++){
-            this -> v[i*(Ny)] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
+            this -> v[i*Ny] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
         }
     }
 
     // Domain on top of cavity if rankshift[1] = -2
     if (rankShift[1] == -2){
         for (int i = 0; i < this -> Nx ; i++){
-            this -> v[(Ny-1) + i*(Ny)] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+            this -> v[(Ny-1) + i*Ny] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
         }
     }
 
@@ -162,7 +162,7 @@ void LidDrivenCavity::Integrate()
 }
 
 //////////////////////////////////////////////////////////////
-// HELPER FUNCTIONS
+// IO FUNCTIONS
 
 void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
