@@ -70,7 +70,6 @@ int main(int argc, char **argv)
     MPI_Cart_shift(cartGrid, 0, 1, &rankShift[0], &rankShift[1]);
     MPI_Cart_shift(cartGrid, 1, 1, &rankShift[2], &rankShift[3]);
 
-
     // Compute number of nodes assigned to subdomain
     int subGridSize[2];
     double subDomainSize[2];
@@ -81,7 +80,9 @@ int main(int argc, char **argv)
     
     // Initialize solver
     solver->Initialise();
-
+    solver->LDCStatus(0);
+    solver->PrintArray("s", 0);
+    solver->PrintArray("v", 0);
     // Run the solver
     solver->Integrate();
 

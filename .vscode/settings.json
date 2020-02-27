@@ -3,7 +3,8 @@
         "__functional_03": "cpp",
         "__functional_base": "cpp",
         "__locale": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "ostream": "cpp"
     },
     "cmake.configureOnOpen": true
 }

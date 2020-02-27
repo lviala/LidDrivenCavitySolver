@@ -23,10 +23,14 @@ public:
     void getTimeStep(double& dt);
     void getFinalTime(double& T);
     void getReynoldsNumber(double& Re);
+    void getStreamFunction(double* s);
+    void getVorticity(double* v);
     
-    // Methods
+    // Methods    
     void Initialise();
     void Integrate();
+    void PrintArray(const char* varStr, int rank);
+    void LDCStatus(int rank);
 
 private:
 
