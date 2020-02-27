@@ -1,5 +1,6 @@
 #include "LidDrivenCavity.h"
 #include <iostream>
+#include <cstring>
 
 LidDrivenCavity::LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double T, double Re)
 {   
