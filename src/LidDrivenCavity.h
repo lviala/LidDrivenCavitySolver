@@ -8,7 +8,7 @@ class LidDrivenCavity
 {
 public:
     // Constructors
-    LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double T, double Re);
+    LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re);
     ~LidDrivenCavity();
 
     // Setters
@@ -29,6 +29,7 @@ public:
     
     // Methods    
     void Initialise();
+    void UpdateGlobalBcs();
     void Integrate();
     void PrintArray(const char* varStr, int rank);
     void LDCStatus(int rank);
@@ -46,8 +47,11 @@ private:
     double* s = nullptr;
 
     double dt;
+    double dx;
+    double dy;
     double T;
     int    Nx;
     int    Ny;
     double Re;
+    double U = 1.0;
 };

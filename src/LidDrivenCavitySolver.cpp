@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     // Domain related Variables
     bool b_help = false; // Help menu request boolean
     int gridSize[2], partitionSize[2];
-    double domainSize[2], timeStep, finalTime, reynoldsNumber;
+    double domainSize[2], timeStep, xStep, yStep, finalTime, reynoldsNumber;
 
     // Read and parse program options from command line
     po::variables_map vm;
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     }
 
     // Pass argument values to main variables
-    LDCsetVar(vm, gridSize, partitionSize, domainSize, timeStep, finalTime, reynoldsNumber );
+    LDCsetVar(vm, gridSize, partitionSize, domainSize, timeStep, xStep, yStep, finalTime, reynoldsNumber );
 
     // If number of processes is not compatible with domain
     // domain partitions return 1 and exit;
@@ -74,15 +74,18 @@ int main(int argc, char **argv)
     int subGridSize[2];
     double subDomainSize[2];
     mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize);
-
+    
     // Create a new instance of the LidDrivenCavity class
-    LidDrivenCavity* solver = new LidDrivenCavity(rank, rankShift, coords, subGridSize, timeStep, finalTime, reynoldsNumber);
+    LidDrivenCavity* solver = new LidDrivenCavity(rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, finalTime, reynoldsNumber);
     
     // Initialize solver
     solver->Initialise();
-    solver->LDCStatus(0);
-    solver->PrintArray("s", 0);
-    solver->PrintArray("v", 0);
+    solver->UpdateGlobalBcs();
+        // Checks
+        solver->LDCStatus(3);
+        solver->PrintArray("s", 3);
+        solver->PrintArray("v", 3);
+
     // Run the solver
     solver->Integrate();
 

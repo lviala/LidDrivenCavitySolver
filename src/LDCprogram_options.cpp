@@ -46,7 +46,8 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm, int& rank)
 
 void LDCsetVar(po::variables_map& vm, 
                     int* gridSize, int* partitionSize, double* domainSize, 
-                    double& timeStep, double& finalTime, double& reynoldsNumber) {
+                    double& timeStep, double& xStep, double& yStep, 
+                    double& finalTime, double& reynoldsNumber) {
 
     // Note: working in column-major format: y-direction to be 0-direction
     gridSize[1] = vm["Nx"].as<int>();
@@ -61,5 +62,8 @@ void LDCsetVar(po::variables_map& vm,
     timeStep = vm["dt"].as<double>();
     finalTime = vm["T"].as<double>();
     reynoldsNumber = vm["Re"].as<double>();
+
+    xStep = domainSize[1]/(gridSize[1] - 1);
+    yStep = domainSize[0]/(gridSize[0] - 1);
 
 }

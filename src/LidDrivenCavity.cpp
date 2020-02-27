@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstring>
 
-LidDrivenCavity::LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double T, double Re)
+LidDrivenCavity::LidDrivenCavity(int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re)
 {   
     this -> rank = rank;
     this -> coords[0] = coords[0];
@@ -16,6 +16,8 @@ LidDrivenCavity::LidDrivenCavity(int rank, int* rankShift, int* coords, int* gri
     this -> Ny = gridSize[0];
     
     this -> dt = dt;
+    this -> dx = dx;
+    this -> dy = dy;
     this -> T = T;
     this -> Re = Re;
 }
@@ -120,6 +122,41 @@ void LidDrivenCavity::Initialise()
 
 }
 
+void LidDrivenCavity::UpdateGlobalBcs(){
+    // Determine if subgrid is on the edge of the global domain
+    // and set appropriate BCs on vorticity field.
+    // Recall direction convention of array: 
+    //      Column major with [+ve y-direction -> down , +ve x_direction -> right]
+
+    // Domain on bottom of cavity if rankshift[0] = -2
+    if (rankShift[0] == -2){
+        for (int i = 0; i < this -> Nx ; i++){
+            this -> v[i*(Ny)] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
+        }
+    }
+
+    // Domain on top of cavity if rankshift[1] = -2
+    if (rankShift[1] == -2){
+        for (int i = 0; i < this -> Nx ; i++){
+            this -> v[(Ny-1) + i*(Ny)] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+        }
+    }
+
+    // Domain on left of cavity if rankshift[2] = -2
+    if (rankShift[2] == -2){
+        for (int j = 0; j < this -> Ny; j++){
+            this -> v[j] = (2/(dx*dx))*(s[j] - s[j + Ny]);
+        }
+    }
+
+    // Domain on right of cavity if rankshift[3] = -2
+    if (rankShift[3] == -2){
+        for (int j = 0; j < this -> Ny; j++){
+            this -> v[j + (Nx - 1)*Ny] = (2/(dx*dx))*(s[j+ (Nx - 1)*Ny] - s[j + (Nx - 2)*Ny]);
+        }
+    }
+}
+
 void LidDrivenCavity::Integrate()
 {
 }
@@ -141,7 +178,7 @@ void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
         for (int j=0; j < Ny; j++){
             for (int i=0; i < Nx; i++){
-                cout << toPrint[j + (Nx-1)*i] << "  ";
+                cout << toPrint[j + Ny*i] << "  ";
             }
             cout << endl;
         }
