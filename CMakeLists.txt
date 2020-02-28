@@ -15,9 +15,12 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 find_package(BLAS REQUIRED)
 INCLUDE_DIRECTORIES(${BLAS_INCLUDE_DIR})
 
-add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCprogram_options.cpp src/LDCmngMPI.cpp)
+find_package(LAPACK REQUIRED)
+INCLUDE_DIRECTORIES(${LAPACK_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES( LidDrivenCavitySolver ${Boost_LIBRARIES} ${MPI_LIBRARIES} ${BLAS_LIBRARIES})
+add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCpoissonSolver.cpp src/LDCprogram_options.cpp src/LDCmngMPI.cpp)
+
+TARGET_LINK_LIBRARIES( LidDrivenCavitySolver ${Boost_LIBRARIES} ${MPI_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 set_target_properties(LidDrivenCavitySolver PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

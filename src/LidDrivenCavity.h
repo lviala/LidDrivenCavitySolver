@@ -3,6 +3,8 @@
 #include <string>
 #include <cstring>
 #include <mpi.h>
+
+#include "LDCpoissonSolver.h"
 using namespace std;
 
 class LidDrivenCavity
@@ -42,14 +44,17 @@ public:
     void LDCStatus(int rank);
 
 private:
+    // MEMBER CLASSES
+    MPI_Comm MPIcomm;
+    LDCpoissonSolver PoissonSolver;
 
-    //Methods
+    // MEMBER METHODS
     void InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm);
     void InterfaceRecv(int& count, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm);
 
-    MPI_Comm MPIcomm;
-    // Contains coordinate of subdomain on cartesian grid
-    int coords[2];
+    //MEMBER VARIABLES
+    int coords[2];// Contains coordinate of subdomain on cartesian grid
+
     // rankShift[0] = rank of process below - rankShift[1] = rank of process above
     // rankShift[2] = rank of process left - rankShift[3] = rank of process right 
     int rankShift[4];

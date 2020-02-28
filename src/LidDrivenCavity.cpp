@@ -10,6 +10,8 @@ extern "C" {
                           const double *y, const int& incy);
 }
 
+//////////////////////////////////////////////////////////////
+// CONSTRUCTORS
 
 LidDrivenCavity::LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re)
 {   
