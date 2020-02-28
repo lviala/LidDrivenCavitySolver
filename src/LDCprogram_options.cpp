@@ -40,8 +40,6 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm, int& rank)
     {
         return false;
     }
-    
-
 }
 
 void LDCsetVar(po::variables_map& vm, 

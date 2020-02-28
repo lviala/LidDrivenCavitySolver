@@ -126,11 +126,11 @@ void LidDrivenCavity::Initialise()
 
     // Allocate memory to fields and buffers
     this -> v = new double [Nx*Ny];
-    //memset(this -> v , 0 , Ny * Nx );
-    fill_n(v,Ny*Nx,rank);
+    memset(this -> v , 0 , Ny * Nx );
+
     this -> s = new double [Nx*Ny];
-    //memset(this -> s , 0 , Ny * Nx);
-    fill_n(s,Ny*Nx,rank);
+    memset(this -> s , 0 , Ny * Nx);
+
 
     this -> bufNx = new double [Nx];
     memset(this -> bufNx , 0 , Nx);

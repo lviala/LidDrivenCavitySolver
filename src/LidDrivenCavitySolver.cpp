@@ -81,17 +81,9 @@ int main(int argc, char **argv)
     // Initialize solver
     solver->Initialise();
     solver->UpdateGlobalBcs();
-        // Checks
-        solver->LDCStatus(2);
+
     // Run the solver
     solver->Integrate();
-        // Checks
-        solver->PrintArray("s", 0);
-        solver->PrintArray("s", 1);
-        solver->PrintArray("s", 2);
-        solver->PrintArray("s", 3);
-        solver->PrintArray("s", 4);
-        solver->PrintArray("s", 5);
 
     delete solver;
     MPI_Finalize();
