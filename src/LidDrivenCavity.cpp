@@ -1,5 +1,7 @@
 #include "LidDrivenCavity.h"
+#include "LDCpoissonSolver.h"
 #include <iostream>
+#include <iomanip>
 #include <cstring>
 #include <mpi.h>
 
@@ -36,6 +38,9 @@ LidDrivenCavity::LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int
 
 LidDrivenCavity::~LidDrivenCavity()
 {
+    delete poissonSolver;
+    delete v;
+    delete s;
 }
 
 //////////////////////////////////////////////////////////////
@@ -109,6 +114,7 @@ void LidDrivenCavity::getReynoldsNumber(double& Re)
 // SOLVERS
 void LidDrivenCavity::Initialise()
 {
+
     // Compute the necessary overlap required between subdomains
     // Based on neighbors of cartesian subgrid
     // rankShift[i] = -2 indicates MPI_PROC_NULL
@@ -138,6 +144,10 @@ void LidDrivenCavity::Initialise()
     memset(this -> bufNx , 0 , Nx);
     this -> bufNy = new double [Ny];
     memset(this -> bufNy , 0 , Ny);
+
+    poissonSolver = new LDCpoissonSolver(rank);
+    poissonSolver -> Initialize(Nx, Ny, dx, dy);
+
 }
 
 void LidDrivenCavity::UpdateGlobalBcs(){
@@ -263,7 +273,7 @@ void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
         for (int j=0; j < Ny; j++){
             for (int i=0; i < Nx; i++){
-                cout << toPrint[j + Ny*i] << "  ";
+                cout << setw(4) << toPrint[j + Ny*i] << "  ";
             }
             cout << endl;
         }

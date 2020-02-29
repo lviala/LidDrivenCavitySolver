@@ -8,6 +8,7 @@ namespace po = boost::program_options;
 
 #include "LDCprogram_options.h"
 #include "LidDrivenCavity.h"
+#include "LDCpoissonSolver.h"
 #include "LDCmngMPI.h" // namespace mngMPI
 
 int main(int argc, char **argv)
@@ -84,7 +85,8 @@ int main(int argc, char **argv)
 
     // Run the solver
     solver->Integrate();
-
+    solver -> LDCStatus(0);
+    solver -> PrintArray("v",0);
     delete solver;
     MPI_Finalize();
 

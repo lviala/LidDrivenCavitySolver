@@ -9,7 +9,9 @@ using namespace std;
 
 class LidDrivenCavity
 {
+
 public:
+    
     // Constructors
     LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re);
     ~LidDrivenCavity();
@@ -46,7 +48,7 @@ public:
 private:
     // MEMBER CLASSES
     MPI_Comm MPIcomm;
-    LDCpoissonSolver PoissonSolver;
+    LDCpoissonSolver* poissonSolver;
 
     // MEMBER METHODS
     void InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm);
