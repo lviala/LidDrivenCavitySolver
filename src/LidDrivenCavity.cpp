@@ -46,170 +46,174 @@ LidDrivenCavity::~LidDrivenCavity()
 //////////////////////////////////////////////////////////////
 // SETTERS
 
-void LidDrivenCavity::SetGridSize(int Nx, int Ny)
-{
-    this -> Nx = Nx;
-    this -> Ny = Ny;
-}
+    void LidDrivenCavity::SetGridSize(int Nx, int Ny)
+    {
+        this -> Nx = Nx;
+        this -> Ny = Ny;
+    }
 
-void LidDrivenCavity::SetTimeStep(double dt)
-{
-    this -> dt = dt;
-}
+    void LidDrivenCavity::SetTimeStep(double dt)
+    {
+        this -> dt = dt;
+    }
 
-void LidDrivenCavity::SetFinalTime(double T)
-{
-    this -> T = T;
-}
+    void LidDrivenCavity::SetFinalTime(double T)
+    {
+        this -> T = T;
+    }
 
-void LidDrivenCavity::SetReynoldsNumber(double Re)
-{
-    this -> Re = Re;
-}
+    void LidDrivenCavity::SetReynoldsNumber(double Re)
+    {
+        this -> Re = Re;
+    }
 
-void LidDrivenCavity::SetCoords(int* coords)
-{
-    this -> coords[0] = coords[0];
-    this -> coords[1] = coords[1];
-}
+    void LidDrivenCavity::SetCoords(int* coords)
+    {
+        this -> coords[0] = coords[0];
+        this -> coords[1] = coords[1];
+    }
+
 
 //////////////////////////////////////////////////////////////
 // GETTERS
 
-void LidDrivenCavity::getCoords(int* coords)
-{
-    coords[0] = this -> coords[0];
-    coords[1] = this -> coords[1];
-}
-void LidDrivenCavity::getGridSize(int* gridSize)
-{
-    gridSize[0] = this -> Nx;
-    gridSize[1] = this -> Ny;
-}
+    void LidDrivenCavity::getCoords(int* coords)
+    {
+        coords[0] = this -> coords[0];
+        coords[1] = this -> coords[1];
+    }
+    void LidDrivenCavity::getGridSize(int* gridSize)
+    {
+        gridSize[0] = this -> Nx;
+        gridSize[1] = this -> Ny;
+    }
 
-void LidDrivenCavity::getTimeStep(double& dt)
-{
-    dt = this -> dt;
-}
+    void LidDrivenCavity::getTimeStep(double& dt)
+    {
+        dt = this -> dt;
+    }
 
-void LidDrivenCavity::getFinalTime(double& T)
-{
-    T = this -> T;
-}
+    void LidDrivenCavity::getFinalTime(double& T)
+    {
+        T = this -> T;
+    }
 
-void LidDrivenCavity::getStreamFunction(double* s)
-{
-    s = this -> s;
-}
-void LidDrivenCavity::getVorticity(double* v)
-{
-    v = this -> v;
-}
-void LidDrivenCavity::getReynoldsNumber(double& Re)
-{
-    Re = this -> Re;
-}
+    void LidDrivenCavity::getStreamFunction(double* s)
+    {
+        s = this -> s;
+    }
+    void LidDrivenCavity::getVorticity(double* v)
+    {
+        v = this -> v;
+    }
+    void LidDrivenCavity::getReynoldsNumber(double& Re)
+    {
+        Re = this -> Re;
+    }
 
 //////////////////////////////////////////////////////////////
 // SOLVERS
-void LidDrivenCavity::Initialise()
-{
+    void LidDrivenCavity::Initialise()
+    {
 
-    // Compute the necessary overlap required between subdomains
-    // Based on neighbors of cartesian subgrid
-    // rankShift[i] = -2 indicates MPI_PROC_NULL
+        // Compute the necessary overlap required between subdomains
+        // Based on neighbors of cartesian subgrid
+        // rankShift[i] = -2 indicates MPI_PROC_NULL
 
-    if (rankShift[0] != -2){
-        Ny += 1;
+        if (rankShift[0] != -2){
+            Ny += 1;
+        }
+        if (rankShift[1] != -2){
+            Ny += 1;
+        }
+        if (rankShift[2] != -2){
+            Nx += 1;
+        }
+        if (rankShift[3] != -2){
+            Nx += 1;
+            }
+
+        // Allocate memory to fields and buffers
+        this -> v = new double [Nx*Ny]{};
+        this -> s = new double [Nx*Ny]{};
+
+        // TESTER: TO DELETE
+        if (rank == 0){
+            fill_n(v, Nx*Ny, 3);
+            fill_n(s, Nx*Ny, 1);
+        }
+        if(rank == 1 || rank == 3){
+            fill_n(s, Nx*Ny, 2);
+        }
+        //
+
+        this -> bufNx = new double [Nx]{};
+        this -> bufNy = new double [Ny]{};
+
+        poissonSolver = new LDCpoissonSolver(rank);
+        poissonSolver -> Initialize(Nx, Ny, dx, dy);
+
     }
-    if (rankShift[1] != -2){
-        Ny += 1;
-    }
-    if (rankShift[2] != -2){
-        Nx += 1;
-    }
-    if (rankShift[3] != -2){
-        Nx += 1;
+
+    void LidDrivenCavity::UpdateGlobalBcs(){
+        // Determine if subgrid is on the edge of the global domain
+        // and set appropriate BCs on vorticity field.
+        // Recall direction convention of array: 
+        //      Column major with [+ve y-direction -> down , +ve x_direction -> right]
+
+        // Domain on bottom of cavity if rankshift[0] = -2
+        if (rankShift[0] == -2){
+            for (int i = 0; i < this -> Nx ; i++){
+                this -> v[i*Ny] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
+            }
         }
 
-    // Allocate memory to fields and buffers
-    this -> v = new double [Nx*Ny]{};
-    this -> s = new double [Nx*Ny]{};
+        // Domain on top of cavity if rankshift[1] = -2
+        if (rankShift[1] == -2){
+            for (int i = 0; i < this -> Nx ; i++){
+                this -> v[(Ny-1) + i*Ny] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+            }
+        }
 
-    // TESTER: TO DELETE
-    if (rank == 0){
-        fill_n(v, Nx*Ny, 3);
-        fill_n(s, Nx*Ny, 1);
-    }
-    if(rank == 1 || rank == 3){
-        fill_n(s, Nx*Ny, 2);
-    }
-    //
+        // Domain on left of cavity if rankshift[2] = -2
+        if (rankShift[2] == -2){
+            for (int j = 0; j < this -> Ny; j++){
+                this -> v[j] = (2/(dx*dx))*(s[j] - s[j + Ny]);
+            }
+        }
 
-    this -> bufNx = new double [Nx]{};
-    this -> bufNy = new double [Ny]{};
-
-    poissonSolver = new LDCpoissonSolver(rank);
-    poissonSolver -> Initialize(Nx, Ny, dx, dy);
-
-}
-
-void LidDrivenCavity::UpdateGlobalBcs(){
-    // Determine if subgrid is on the edge of the global domain
-    // and set appropriate BCs on vorticity field.
-    // Recall direction convention of array: 
-    //      Column major with [+ve y-direction -> down , +ve x_direction -> right]
-
-    // Domain on bottom of cavity if rankshift[0] = -2
-    if (rankShift[0] == -2){
-        for (int i = 0; i < this -> Nx ; i++){
-            this -> v[i*Ny] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
+        // Domain on right of cavity if rankshift[3] = -2
+        if (rankShift[3] == -2){
+            for (int j = 0; j < this -> Ny; j++){
+                this -> v[j + (Nx - 1)*Ny] = (2/(dx*dx))*(s[j+ (Nx - 1)*Ny] - s[j + (Nx - 2)*Ny]);
+            }
         }
     }
 
-    // Domain on top of cavity if rankshift[1] = -2
-    if (rankShift[1] == -2){
-        for (int i = 0; i < this -> Nx ; i++){
-            this -> v[(Ny-1) + i*Ny] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+    void LidDrivenCavity::Solve(){
+        
+        this -> PrintArray("s",5);
+        
+        InterfaceBroadcast(s);
+        InterfaceGather(s);
+
+        for (int k = 0; k <= 5; k++ ){
+            // Solve the system until BCs converge between subdomaina
+            // Currently hardcoded, should implement residual change
+            poissonSolver -> SolvePoisson(this -> v, this -> s);
+
+            InterfaceBroadcast(s);
+            InterfaceGather(s);
         }
+        
+        this -> PrintArray("s",5);
+
     }
 
-    // Domain on left of cavity if rankshift[2] = -2
-    if (rankShift[2] == -2){
-        for (int j = 0; j < this -> Ny; j++){
-            this -> v[j] = (2/(dx*dx))*(s[j] - s[j + Ny]);
-        }
+    void LidDrivenCavity::Integrate()
+    {
+        
     }
-
-    // Domain on right of cavity if rankshift[3] = -2
-    if (rankShift[3] == -2){
-        for (int j = 0; j < this -> Ny; j++){
-            this -> v[j + (Nx - 1)*Ny] = (2/(dx*dx))*(s[j+ (Nx - 1)*Ny] - s[j + (Nx - 2)*Ny]);
-        }
-    }
-}
-
-void LidDrivenCavity::Solve()
-{
-    InterfaceBroadcast(s);
-    InterfaceGather(s);
-
-    this -> PrintArray("s",5);
-    
-    poissonSolver -> SolvePoisson(this -> v, this -> s);
-
-    this -> PrintArray("s",5);
-    InterfaceBroadcast(s);
-    InterfaceGather(s);
-    
-    
-
-}
-
-void LidDrivenCavity::Integrate()
-{
-    
-}
 
 //////////////////////////////////////////////////////////////
 // MPI INTERFACE MANAGEMENT

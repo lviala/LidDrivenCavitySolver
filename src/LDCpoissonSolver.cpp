@@ -39,6 +39,10 @@ LDCpoissonSolver::~LDCpoissonSolver(){
 
 void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
 
+    if(rank == 0){
+        cout << "Initializing Poisson Solver" << endl << endl;
+    }
+
     this -> Nx = Nx-2;
     this -> Ny = Ny-2;
     nNodes = (this -> Nx)*(this -> Ny); // Number of nodes in domain
@@ -60,6 +64,10 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
 }
 
 void LDCpoissonSolver::Build2DLaplace(){
+
+    if(rank == 0){
+        cout << "Building Coefficient matrix" << endl << endl;
+    }
 
     // Index of diagonal entry
     int idDiag;
@@ -120,6 +128,10 @@ void LDCpoissonSolver::SolvePoisson(double* v, double* s){
 }
 
 void LDCpoissonSolver::Factor2DLaplace(){
+    
+    if (rank ==0 ){
+        cout << "Computing coefficient matrix factor" << endl << endl;
+    }
 
     F77NAME(dpptrf) ('U', nNodes, A, info);
     
