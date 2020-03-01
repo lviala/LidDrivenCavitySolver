@@ -14,6 +14,7 @@ public:
     ~LDCpoissonSolver();
 
     void Initialize(int& Nx, int& Ny, double& dx, double& dy);
+    void BuildRHS(double* s, double* v);
 
     // IO Methods
     void PrintTRIUArray(int rank);
@@ -29,5 +30,6 @@ private:
     int rank, info;
 
     double* A = nullptr;
+    double* b = nullptr;
     double coeff[3];
 };

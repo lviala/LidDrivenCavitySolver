@@ -136,6 +136,16 @@ void LidDrivenCavity::Initialise()
     this -> v = new double [Nx*Ny]{};
     this -> s = new double [Nx*Ny]{};
 
+    // TESTER: TO DELETE
+    if (rank == 0){
+        fill_n(v, Nx*Ny, 3);
+        fill_n(s, Nx*Ny, 1);
+    }
+    if(rank == 1 || rank == 3){
+        fill_n(s, Nx*Ny, 2);
+    }
+    //
+
     this -> bufNx = new double [Nx]{};
     this -> bufNy = new double [Ny]{};
 
@@ -179,10 +189,18 @@ void LidDrivenCavity::UpdateGlobalBcs(){
     }
 }
 
-void LidDrivenCavity::Integrate()
+void LidDrivenCavity::Solve()
 {
     InterfaceBroadcast(s);
     InterfaceGather(s);
+
+    poissonSolver -> BuildRHS(this -> s, this -> v);
+
+}
+
+void LidDrivenCavity::Integrate()
+{
+    
 }
 
 //////////////////////////////////////////////////////////////

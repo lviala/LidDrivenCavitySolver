@@ -35,6 +35,7 @@ public:
     // Solver Methods
     void Initialise();
     void UpdateGlobalBcs();
+    void Solve();
     void Integrate();
 
     // Interface Management Methods
