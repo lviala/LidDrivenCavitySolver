@@ -27,13 +27,13 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
     
     // Assign memory to coefficient Matrix A
     // in LAPACK packed storage format
-    A = new double [nCoeffs];
-    fill_n(A,nCoeffs,0.0);
+    A = new double [nCoeffs]{};
+    //fill_n(A,nCoeffs,0.0);
 
     // Compute coefficients of the 2D FD Laplacian operator
     coeff[0] = -1.0/(dy*dy);
     coeff[2] = -1.0/(dx*dx);
-    coeff[1] = -(coeff[0] + coeff[2]);
+    coeff[1] = -2.0*(coeff[0] + coeff[2]);
 
     this -> Build2DLaplace();
     
