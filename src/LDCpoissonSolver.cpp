@@ -28,7 +28,7 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
     // Assign memory to coefficient Matrix A
     // in LAPACK packed storage format
     A = new double [nCoeffs];
-    memset(A,0,nCoeffs);
+    fill_n(A,nCoeffs,0.0);
 
     // Compute coefficients of the 2D FD Laplacian operator
     coeff[0] = -1.0/(dy*dy);

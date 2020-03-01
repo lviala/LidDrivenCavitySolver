@@ -134,16 +134,16 @@ void LidDrivenCavity::Initialise()
 
     // Allocate memory to fields and buffers
     this -> v = new double [Nx*Ny];
-    memset(this -> v , 0 , Ny * Nx );
+    fill_n(this -> v , Ny * Nx, 0 );
 
     this -> s = new double [Nx*Ny];
-    memset(this -> s , 0 , Ny * Nx);
+    fill_n(this -> v , Ny * Nx, 0 );
 
 
     this -> bufNx = new double [Nx];
-    memset(this -> bufNx , 0 , Nx);
+    fill_n(this -> bufNx , Nx, 0);
     this -> bufNy = new double [Ny];
-    memset(this -> bufNy , 0 , Ny);
+    fill_n(this -> bufNy , Ny, 0);
 
     poissonSolver = new LDCpoissonSolver(rank);
     poissonSolver -> Initialize(Nx, Ny, dx, dy);
