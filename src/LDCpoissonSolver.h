@@ -15,15 +15,18 @@ public:
 
     void Initialize(int& Nx, int& Ny, double& dx, double& dy);
 
+    // IO Methods
+    void PrintTRIUArray(int rank);
+
 private:
 
     // Methods
     void Build2DLaplace();
-    void ComputeFactor();
+    void Factor2DLaplace();
     
     // Linear solver variables
     int nNodes, Nx, Ny, nCoeffs;
-    int rank;
+    int rank, info;
 
     double* A = nullptr;
     double coeff[3];

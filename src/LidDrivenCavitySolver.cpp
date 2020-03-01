@@ -87,6 +87,8 @@ int main(int argc, char **argv)
     solver->Integrate();
     solver -> LDCStatus(0);
     solver -> PrintArray("v",0);
+
+    // Cleanup on program exit
     delete solver;
     MPI_Finalize();
 

@@ -5,8 +5,19 @@
 
 #include "LDCpoissonSolver.h"
 
+#define F77NAME(x) x##_
+extern "C" {
+    double F77NAME(dpptrf) (const char& UPLO, const int& n,
+                            const double* AP, int& info);
+
+    double F77NAME(dpptrs) (const char UPLO, const int& n,
+                            const int& nRHS, const double* AP, 
+                            const double* b, const int& ldb,
+                            int& info);
+}
+
 //////////////////////////////////////////////////////////////
-// SETTERS
+// CONSTRUCTORS
 LDCpoissonSolver::LDCpoissonSolver(int rank){
     this -> rank = rank;
 }
@@ -28,7 +39,6 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
     // Assign memory to coefficient Matrix A
     // in LAPACK packed storage format
     A = new double [nCoeffs]{};
-    //fill_n(A,nCoeffs,0.0);
 
     // Compute coefficients of the 2D FD Laplacian operator
     coeff[0] = -1.0/(dy*dy);
@@ -36,6 +46,9 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
     coeff[1] = -2.0*(coeff[0] + coeff[2]);
 
     this -> Build2DLaplace();
+    this -> PrintTRIUArray(0);
+    this -> Factor2DLaplace();
+    this -> PrintTRIUArray(0);
     
 }
 
@@ -61,7 +74,17 @@ void LDCpoissonSolver::Build2DLaplace(){
         }
 
     }
+}
+
+void LDCpoissonSolver::Factor2DLaplace(){
     if (rank == 0){
+        cout << nNodes << endl;
+        F77NAME(dpptrf) ('U', nNodes, A, info);
+    }
+}
+
+void LDCpoissonSolver::PrintTRIUArray(int rank){
+    if (this -> rank == rank ){
 
         cout << "Nx=" << Nx << "  -  Ny=" << Ny  << "  -  nNodes=" << nNodes << "  -  nCoeffs=" << nCoeffs << endl << endl;
 
@@ -70,15 +93,14 @@ void LDCpoissonSolver::Build2DLaplace(){
             for (int j = 0; j < nNodes; j++){
                 
                 if (i <= j){
-                    cout << setw(6) << A[(i) + j*(j+1)/2];
+                    cout << setw(8) << setprecision(3) <<  A[(i) + j*(j+1)/2];
                 }
                 else {
-                    cout << setw(6) << "";
+                    cout << setw(8) << "";
                 }
             }
             cout << endl;
         }
-        
-    }
     
+    }
 }
