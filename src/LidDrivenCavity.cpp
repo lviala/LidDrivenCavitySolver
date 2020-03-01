@@ -194,7 +194,15 @@ void LidDrivenCavity::Solve()
     InterfaceBroadcast(s);
     InterfaceGather(s);
 
-    poissonSolver -> BuildRHS(this -> s, this -> v);
+    this -> PrintArray("s",5);
+    
+    poissonSolver -> SolvePoisson(this -> v, this -> s);
+
+    this -> PrintArray("s",5);
+    InterfaceBroadcast(s);
+    InterfaceGather(s);
+    
+    
 
 }
 
@@ -212,22 +220,22 @@ void LidDrivenCavity::InterfaceBroadcast(double* field){
     
     // Neighbor below
     if (rankShift[0] != -2){
-        LidDrivenCavity::InterfaceSend(Nx, field, bufNx, Ny, rankShift[0],rank,MPIcomm);
+        LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
     }
 
     // Neighbor above
     if (rankShift[1] != -2){
-        LidDrivenCavity::InterfaceSend(Nx, &field[Ny-1], bufNx, Ny, rankShift[1],rank,MPIcomm);
+        LidDrivenCavity::InterfaceSend(Nx, &field[Ny-2], bufNx, Ny, rankShift[1],rank,MPIcomm);
     }
 
     // Neighbor leftward
     if (rankShift[2] != -2){
-        LidDrivenCavity::InterfaceSend(Ny, field, bufNy, 1, rankShift[2],rank,MPIcomm);
+        LidDrivenCavity::InterfaceSend(Ny, &field[Ny], bufNy, 1, rankShift[2],rank,MPIcomm);
     }
 
     // Neighbor rightward
     if (rankShift[3] != -2){
-        LidDrivenCavity::InterfaceSend(Ny, &field[Ny*(Nx-1)], bufNy, 1, rankShift[3],rank,MPIcomm);
+        LidDrivenCavity::InterfaceSend(Ny, &field[Ny*(Nx-2)], bufNy, 1, rankShift[3],rank,MPIcomm);
     }
 
 }
@@ -274,6 +282,9 @@ void LidDrivenCavity::InterfaceRecv(int& count, double* field, double* buff, int
 void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
     if (this -> rank == rank){
+        
+        cout << "My Rank: " << this -> rank << endl << endl;
+        
         double* toPrint = nullptr;
         
         if (strcmp(varStr,"s") == 0){
@@ -285,7 +296,7 @@ void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
         for (int j=0; j < Ny; j++){
             for (int i=0; i < Nx; i++){
-                cout << setw(4) << toPrint[j + Ny*i] << "  ";
+                cout << setw(6) << setprecision(3) << toPrint[j + Ny*i] << "  ";
             }
             cout << endl;
         }

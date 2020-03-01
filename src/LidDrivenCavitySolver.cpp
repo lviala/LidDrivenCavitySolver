@@ -82,13 +82,9 @@ int main(int argc, char **argv)
     // Initialize solver
     solver->Initialise();
     solver->UpdateGlobalBcs();
-    solver->LDCStatus(0);
-    
+
     // Run the solver
     solver->Solve();
-    solver->PrintArray("s",0);
-    solver->PrintArray("v",0);
-
 
     // Cleanup on program exit
     delete solver;

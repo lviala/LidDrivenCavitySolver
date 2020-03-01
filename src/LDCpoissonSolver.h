@@ -14,7 +14,7 @@ public:
     ~LDCpoissonSolver();
 
     void Initialize(int& Nx, int& Ny, double& dx, double& dy);
-    void BuildRHS(double* s, double* v);
+    void SolvePoisson(double* v,double* s);
 
     // IO Methods
     void PrintTRIUArray(int rank);
@@ -24,6 +24,7 @@ private:
     // Methods
     void Build2DLaplace();
     void Factor2DLaplace();
+    void BuildRHS(double* v, double* s);
     
     // Linear solver variables
     int nNodes, Nx, Ny, nCoeffs;

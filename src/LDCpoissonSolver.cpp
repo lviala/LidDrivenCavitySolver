@@ -79,11 +79,10 @@ void LDCpoissonSolver::Build2DLaplace(){
             // Populate x-direction neighbor
             A[idDiag - Ny] = coeff[2];
         }
-
     }
 }
 
-void LDCpoissonSolver::BuildRHS(double* s, double* v){
+void LDCpoissonSolver::BuildRHS(double* v, double* s){
 
     // Reset RHS vector
     fill_n(b,nNodes,0.0);
@@ -91,7 +90,7 @@ void LDCpoissonSolver::BuildRHS(double* s, double* v){
 
     // Populate vorticity forcing values
     for (int i = 0; i<Nx; i++){
-        F77NAME(dcopy) (Ny, &v[ offset*(i+1) + 1], 1, &b[i*Ny], 1);
+        F77NAME(dcopy) (Ny, &v[offset*(i+1) + 1], 1, &b[i*Ny], 1);
     }
 
     // Populate streamfunction BC values x-direction
@@ -102,14 +101,20 @@ void LDCpoissonSolver::BuildRHS(double* s, double* v){
     F77NAME(daxpy) (Nx, -coeff[0], &s[Ny +2], (Ny + 2), b, Ny);
     F77NAME(daxpy) (Nx, -coeff[0], &s[2*(Ny +2) - 1], (Ny + 2), &b[Ny-1], Ny);
 
-    if (rank == 0){
+}
 
-        cout << "Build RHS: Nx=" << Nx << "  - Ny=" << Ny << "  - nNodes=" << nNodes << endl << endl;
+void LDCpoissonSolver::SolvePoisson(double* v, double* s){
 
-        for (int jj = 0; jj< nNodes; jj++){
-            cout << b[jj] << "  ";
-        }
-        cout << endl;
+    // Update RHS vector
+    this -> BuildRHS(s,v);
+    // Solve linear system with LAPACK:
+    // Packed storage, Symetric Positive definite matrix
+    F77NAME(dpptrs) ('U', nNodes, 1, A, b, nNodes, info);
+
+    // Position solution back in streamfunction array
+    int offset = Ny + 2;
+    for(int i =0; i<Nx; i++){
+        F77NAME(dcopy) (Ny, b, 1, &s[offset*(i+1) + 1], 1);
     }
 
 }
