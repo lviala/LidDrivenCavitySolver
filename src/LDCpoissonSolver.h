@@ -13,7 +13,7 @@ public:
     LDCpoissonSolver(int rank);
     ~LDCpoissonSolver();
 
-    void Initialize(int& Nx, int& Ny, double& dx, double& dy);
+    void Initialize(int& Nx, int& Ny, double* coeff);
     void SolvePoisson(double* v,double* s);
 
     // IO Methods

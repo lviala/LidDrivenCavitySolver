@@ -133,6 +133,11 @@ LidDrivenCavity::~LidDrivenCavity()
             Nx += 1;
             }
 
+        // Compute coefficients of the 2D FD Laplacian operator
+        coeff[0] = -1.0/(dy*dy);
+        coeff[2] = -1.0/(dx*dx);
+        coeff[1] = -2.0*(coeff[0] + coeff[2]);
+
         // Allocate memory to fields and buffers
         this -> v = new double [Nx*Ny]{};
         this -> s = new double [Nx*Ny]{};
@@ -151,7 +156,7 @@ LidDrivenCavity::~LidDrivenCavity()
         this -> bufNy = new double [Ny]{};
 
         poissonSolver = new LDCpoissonSolver(rank);
-        poissonSolver -> Initialize(Nx, Ny, dx, dy);
+        poissonSolver -> Initialize(Nx, Ny, coeff);
 
     }
 
@@ -190,9 +195,16 @@ LidDrivenCavity::~LidDrivenCavity()
         }
     }
 
-    void LidDrivenCavity::Solve(){
+    void LidDrivenCavity::UpdateInteriorVorticity(){
+
+    }
+
+    void LidDrivenCavity::Integrate()
+    {
         
-        this -> PrintArray("s",5);
+    }
+
+    void LidDrivenCavity::Solve(){
         
         InterfaceBroadcast(s);
         InterfaceGather(s);
@@ -205,80 +217,72 @@ LidDrivenCavity::~LidDrivenCavity()
             InterfaceBroadcast(s);
             InterfaceGather(s);
         }
-        
-        this -> PrintArray("s",5);
-
-    }
-
-    void LidDrivenCavity::Integrate()
-    {
-        
     }
 
 //////////////////////////////////////////////////////////////
 // MPI INTERFACE MANAGEMENT
 
-void LidDrivenCavity::InterfaceBroadcast(double* field){
-    
-    //Sequentially send interface values to neighbors in all directions
-    
-    // Neighbor below
-    if (rankShift[0] != -2){
-        LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
+    void LidDrivenCavity::InterfaceBroadcast(double* field){
+        
+        //Sequentially send interface values to neighbors in all directions
+        
+        // Neighbor below
+        if (rankShift[0] != -2){
+            LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
+        }
+
+        // Neighbor above
+        if (rankShift[1] != -2){
+            LidDrivenCavity::InterfaceSend(Nx, &field[Ny-2], bufNx, Ny, rankShift[1],rank,MPIcomm);
+        }
+
+        // Neighbor leftward
+        if (rankShift[2] != -2){
+            LidDrivenCavity::InterfaceSend(Ny, &field[Ny], bufNy, 1, rankShift[2],rank,MPIcomm);
+        }
+
+        // Neighbor rightward
+        if (rankShift[3] != -2){
+            LidDrivenCavity::InterfaceSend(Ny, &field[Ny*(Nx-2)], bufNy, 1, rankShift[3],rank,MPIcomm);
+        }
+
     }
 
-    // Neighbor above
-    if (rankShift[1] != -2){
-        LidDrivenCavity::InterfaceSend(Nx, &field[Ny-2], bufNx, Ny, rankShift[1],rank,MPIcomm);
+    void LidDrivenCavity::InterfaceGather(double* field){
+        
+        //Sequentially send interface values to neighbors in all directions
+
+        //Neighbor above
+        if (rankShift[1] != -2){
+            LidDrivenCavity::InterfaceRecv(Nx, &field[Ny-1], bufNx, Ny, rankShift[1], rankShift[1], MPIcomm);
+        }
+
+        //Neighbor below
+        if (rankShift[0] != -2){
+            LidDrivenCavity::InterfaceRecv(Nx, field, bufNx, Ny, rankShift[0], rankShift[0], MPIcomm);
+        }
+
+        //Neighbor rightward
+        if (rankShift[3] != -2){
+            LidDrivenCavity::InterfaceRecv(Ny, &field[Ny*(Nx-1)], bufNy, 1, rankShift[3], rankShift[3], MPIcomm);
+        }
+
+        //Neighbor leftward
+        if (rankShift[2] != -2){
+            LidDrivenCavity::InterfaceRecv(Ny, field, bufNy, 1, rankShift[2], rankShift[2], MPIcomm);
+        }
     }
 
-    // Neighbor leftward
-    if (rankShift[2] != -2){
-        LidDrivenCavity::InterfaceSend(Ny, &field[Ny], bufNy, 1, rankShift[2],rank,MPIcomm);
+
+    void LidDrivenCavity::InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm){
+        F77NAME(dcopy) (count, field, disp, buff, 1);
+        MPI_Send(buff, count, MPI_DOUBLE, dest, tag, MPIcomm);
     }
 
-    // Neighbor rightward
-    if (rankShift[3] != -2){
-        LidDrivenCavity::InterfaceSend(Ny, &field[Ny*(Nx-2)], bufNy, 1, rankShift[3],rank,MPIcomm);
+    void LidDrivenCavity::InterfaceRecv(int& count, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
+        MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
+        F77NAME(dcopy) (count, buff, 1, field, disp);
     }
-
-}
-
-void LidDrivenCavity::InterfaceGather(double* field){
-    
-    //Sequentially send interface values to neighbors in all directions
-
-    //Neighbor above
-    if (rankShift[1] != -2){
-        LidDrivenCavity::InterfaceRecv(Nx, &field[Ny-1], bufNx, Ny, rankShift[1], rankShift[1], MPIcomm);
-    }
-
-    //Neighbor below
-    if (rankShift[0] != -2){
-        LidDrivenCavity::InterfaceRecv(Nx, field, bufNx, Ny, rankShift[0], rankShift[0], MPIcomm);
-    }
-
-    //Neighbor rightward
-    if (rankShift[3] != -2){
-        LidDrivenCavity::InterfaceRecv(Ny, &field[Ny*(Nx-1)], bufNy, 1, rankShift[3], rankShift[3], MPIcomm);
-    }
-
-    //Neighbor leftward
-    if (rankShift[2] != -2){
-        LidDrivenCavity::InterfaceRecv(Ny, field, bufNy, 1, rankShift[2], rankShift[2], MPIcomm);
-    }
-}
-
-
-void LidDrivenCavity::InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm){
-    F77NAME(dcopy) (count, field, disp, buff, 1);
-    MPI_Send(buff, count, MPI_DOUBLE, dest, tag, MPIcomm);
-}
-
-void LidDrivenCavity::InterfaceRecv(int& count, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
-    MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
-    F77NAME(dcopy) (count, buff, 1, field, disp);
-}
 
 //////////////////////////////////////////////////////////////
 // IO FUNCTIONS

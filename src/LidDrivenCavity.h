@@ -35,8 +35,10 @@ public:
     // Solver Methods
     void Initialise();
     void UpdateGlobalBcs();
-    void Solve();
+    void UpdateInteriorVorticity();
     void Integrate();
+    void Solve();
+    
 
     // Interface Management Methods
     void InterfaceBroadcast(double* field);
@@ -64,6 +66,7 @@ private:
     int rank;
 
     // Streamfunction and Vorticity field arrays
+    double coeff[3];
     double* v = nullptr;
     double* s = nullptr;
     

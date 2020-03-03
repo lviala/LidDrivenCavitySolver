@@ -37,7 +37,7 @@ LDCpoissonSolver::~LDCpoissonSolver(){
 //////////////////////////////////////////////////////////////
 // SOLVERS
 
-void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
+void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double* coeff){
 
     if(rank == 0){
         cout << "Initializing Poisson Solver" << endl << endl;
@@ -54,10 +54,11 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
     b = new double [nNodes]{};
 
     // Compute coefficients of the 2D FD Laplacian operator
-    coeff[0] = -1.0/(dy*dy);
-    coeff[2] = -1.0/(dx*dx);
-    coeff[1] = -2.0*(coeff[0] + coeff[2]);
+    this -> coeff[0] = coeff[0];
+    this -> coeff[1] = coeff[1];
+    this -> coeff[2] = coeff[2];
 
+    // Initialize 2D Laplace coefficient matrix and factor
     this -> Build2DLaplace();
     this -> Factor2DLaplace();
     
@@ -66,7 +67,7 @@ void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double& dx, double& dy){
 void LDCpoissonSolver::Build2DLaplace(){
 
     if(rank == 0){
-        cout << "Building Coefficient matrix" << endl << endl;
+        cout << "Building Coefficient matrix" <<  endl << endl;
     }
 
     // Index of diagonal entry
@@ -130,7 +131,7 @@ void LDCpoissonSolver::SolvePoisson(double* v, double* s){
 void LDCpoissonSolver::Factor2DLaplace(){
     
     if (rank ==0 ){
-        cout << "Computing coefficient matrix factor" << endl << endl;
+        cout << "Computing coefficient matrix factor" << endl;
     }
 
     F77NAME(dpptrf) ('U', nNodes, A, info);
