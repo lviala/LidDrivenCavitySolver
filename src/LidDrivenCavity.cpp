@@ -139,22 +139,20 @@ LidDrivenCavity::~LidDrivenCavity()
         coeff[1] = -2.0*(coeff[0] + coeff[2]);
 
         // Allocate memory to fields and buffers
-        this -> v = new double [Nx*Ny]{};
         this -> s = new double [Nx*Ny]{};
-
-        // TESTER: TO DELETE
-        if (rank == 0){
-            fill_n(v, Nx*Ny, 3);
-            fill_n(s, Nx*Ny, 1);
-        }
-        if(rank == 1 || rank == 3){
-            fill_n(s, Nx*Ny, 2);
-        }
-        //
-
+        this -> v = new double [Nx*Ny]{};
+        this -> v_new = new double [Nx*Ny]{};
+        
+        // Allocate memory to communication buffers
         this -> bufNx = new double [Nx]{};
         this -> bufNy = new double [Ny]{};
 
+        // Initial update of global BCs
+        this -> UpdateGlobalBcs();
+
+
+        // Initialize poisson solver object
+        // Builds coefficient matrix and other necessary variables
         poissonSolver = new LDCpoissonSolver(rank);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
@@ -195,28 +193,92 @@ LidDrivenCavity::~LidDrivenCavity()
         }
     }
 
-    void LidDrivenCavity::UpdateInteriorVorticity(){
-
-    }
-
     void LidDrivenCavity::Integrate()
-    {
+    {   
+        // Copy the values of v to v_new to preserve BCs
+        F77NAME(dcopy)(Ny*Nx, v, 1, v_new, 1);
+
+        // Overwrite the values of v_new with the laplacian of v
+        FDLalplacianOperator(dt/Re, v, v_new);
+        // Add the contribution of advection to v_new
+        FDAdvectionOperator(dt, s, v, v_new);
         
+        // Add the value of v to v_new
+        for (int i=1; i < Nx-1; i++ ){
+            for (int j=1; j< Ny -1; j++){
+                v_new[ j + Ny*i ] += v[ j + Ny*i ];
+            }
+        }
+
+        // Copy the values of v_new to v
+        F77NAME(dcopy)(Ny*Nx, v_new, 1, v, 1);
     }
 
     void LidDrivenCavity::Solve(){
-        
-        InterfaceBroadcast(s);
-        InterfaceGather(s);
+        double t = 0.0;
 
-        for (int k = 0; k <= 5; k++ ){
-            // Solve the system until BCs converge between subdomaina
-            // Currently hardcoded, should implement residual change
-            poissonSolver -> SolvePoisson(this -> v, this -> s);
+        do{
+            // Print solver status to console
+            // if(rank == 0){
+            //     cout << "t = " << t << " of T = " << T << endl;
+            // }
 
-            InterfaceBroadcast(s);
-            InterfaceGather(s);
+            FDLalplacianOperator(-1, s, v);
+
+            // Update interface values of the vorticity field
+            InterfaceBroadcast(v);
+            InterfaceGather(v);
+
+            Integrate();
+
+            // Update interface values of the vorticity field
+            InterfaceBroadcast(v);
+            InterfaceGather(v);
+
+            // Solve the poisson problem to update the streamfunction field
+            for (int k = 0; k <= 1; k++ ){
+                // Solve the system until BCs converge between subdomains
+                // Currently hardcoded, should implement residual change
+                poissonSolver -> SolvePoisson(this -> v, this -> s);
+
+                InterfaceBroadcast(s);
+                InterfaceGather(s);
+            }
+
+            UpdateGlobalBcs();
+
+            // Update time
+            t += dt;
         }
+        while (t <= T);
+    }
+
+//////////////////////////////////////////////////////////////
+// FINITE DIFFERENCE OPERATORS
+
+    void LidDrivenCavity::FDLalplacianOperator(const double& alpha, double* x, double* y){
+        // Overwrites the values of array y with the laplacian of array x
+        // Multiplied by scalar alpha
+        
+        for (int i=1; i < Nx-1; i++){
+            for (int j=1; j< Ny -1; j++){
+                y[ j + Ny*i ] = alpha/(dy*dy)*( x[(j+1) + Ny*i] - 2.0*x[j + Ny*i] + x[(j-1) + Ny*i] ) +
+                                alpha/(dx*dx)*( x[j + Ny*(i+1)] - 2.0*x[j + Ny*i] + x[j + Ny*(i-1)] );
+            }
+        }
+    }
+
+    void LidDrivenCavity::FDAdvectionOperator(const double& alpha, double* s, double* v, double* v_new){
+        // Adds the advection component of the momentum equation to the values of array y
+
+        for (int i=1; i < Nx-1; i++ ){
+            for (int j=1; j< Ny -1; j++){
+                v_new[j + Ny*i] += alpha * ((0.5/dy)*(v[(j+1) + Ny*i] - v[(j-1) + Ny*i]) * (0.5/dx)*(s[j + Ny*(i+1)] - s[j + Ny*(i-1)]) - 
+                                    (0.5/dy)*(s[(j+1) + Ny*i] - s[(j-1) + Ny*i]) * (0.5/dx)*(v[j + Ny*(i+1)] - s[j + Ny*(i-1)]));
+            }
+        }
+        
+
     }
 
 //////////////////////////////////////////////////////////////
@@ -225,7 +287,7 @@ LidDrivenCavity::~LidDrivenCavity()
     void LidDrivenCavity::InterfaceBroadcast(double* field){
         
         //Sequentially send interface values to neighbors in all directions
-        
+        MPI_Barrier(MPIcomm);
         // Neighbor below
         if (rankShift[0] != -2){
             LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
