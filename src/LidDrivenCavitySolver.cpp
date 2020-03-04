@@ -73,21 +73,20 @@ int main(int argc, char **argv)
 
     // Compute number of nodes assigned to subdomain
     int subGridSize[2];
-    double subDomainSize[2];
-    mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize);
+    double subDomainSize[2], subPos[2];
+    mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize, xStep, yStep, subPos);
     
     // Create a new instance of the LidDrivenCavity class
-    LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD, rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, finalTime, reynoldsNumber);
+    LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD, rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, subPos, finalTime, reynoldsNumber);
     
     // Initialize solver
     solver->Initialise();
-    solver -> LDCStatus(0);
     
     // Run the solver
     solver->Solve();
 
-    solver -> PrintArray("s",0);
-    solver -> PrintArray("v",0);
+    // Output solution
+    solver->LDCPrintSolution2File("N20_dt0p001_T0p01.csv");
 
     // Cleanup on program exit
     delete solver;

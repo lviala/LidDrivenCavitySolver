@@ -2,6 +2,7 @@
 #include "LDCpoissonSolver.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <cstring>
 #include <mpi.h>
 
@@ -15,33 +16,40 @@ extern "C" {
 //////////////////////////////////////////////////////////////
 // CONSTRUCTORS
 
-LidDrivenCavity::LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re)
-{   
-    this -> MPIcomm = MPIcomm;
-    this -> rank = rank;
-    this -> coords[0] = coords[0];
-    this -> coords[1] = coords[1];
-    this -> rankShift[0] = rankShift[0];
-    this -> rankShift[1] = rankShift[1];
-    this -> rankShift[2] = rankShift[2];
-    this -> rankShift[3] = rankShift[3];
+    LidDrivenCavity::LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double* subPos, double T, double Re)
+    {   
+        this -> MPIcomm = MPIcomm;
+        this -> rank = rank;
 
-    this -> Nx = gridSize[1];
-    this -> Ny = gridSize[0];
-    
-    this -> dt = dt;
-    this -> dx = dx;
-    this -> dy = dy;
-    this -> T = T;
-    this -> Re = Re;
-}
+        this -> coords[0] = coords[0];
+        this -> coords[1] = coords[1];
 
-LidDrivenCavity::~LidDrivenCavity()
-{
-    delete poissonSolver;
-    delete v;
-    delete s;
-}
+        this -> rankShift[0] = rankShift[0];
+        this -> rankShift[1] = rankShift[1];
+        this -> rankShift[2] = rankShift[2];
+        this -> rankShift[3] = rankShift[3];
+
+        this -> Nx = gridSize[1];
+        this -> Ny = gridSize[0];
+        
+        this -> dx = dx;
+        this -> dy = dy;
+
+        this -> subPos[0] = subPos[0];
+        this -> subPos[1] = subPos[1];
+
+        this -> dt = dt;
+        this -> T = T;
+        this -> Re = Re;
+    }
+
+    LidDrivenCavity::~LidDrivenCavity()
+    {
+        delete poissonSolver;
+        delete[] v;
+        //delete[] v_new; // Causes error for some reason...
+        delete[] s;
+    }
 
 //////////////////////////////////////////////////////////////
 // SETTERS
@@ -236,7 +244,7 @@ LidDrivenCavity::~LidDrivenCavity()
             InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k <= 5; k++ ){
+            for (int k = 0; k <= 0; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);
@@ -348,37 +356,100 @@ LidDrivenCavity::~LidDrivenCavity()
 //////////////////////////////////////////////////////////////
 // IO FUNCTIONS
 
-void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
+    void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
-    if (this -> rank == rank){
-        
-        cout << "My Rank: " << this -> rank << endl << endl;
-        
-        double* toPrint = nullptr;
-        
-        if (strcmp(varStr,"s") == 0){
-            toPrint = this -> s;
-        }
-        else if (strcmp(varStr,"v") == 0){
-            toPrint = this -> v;
-        }
-
-        for (int j=0; j < Ny; j++){
-            for (int i=0; i < Nx; i++){
-                cout << setw(8) << setprecision(3) << toPrint[j + Ny*i] << "  ";
+        if (this -> rank == rank){
+            
+            cout << "My Rank: " << this -> rank << endl << endl;
+            
+            double* toPrint = nullptr;
+            
+            if (strcmp(varStr,"s") == 0){
+                toPrint = this -> s;
             }
+            else if (strcmp(varStr,"v") == 0){
+                toPrint = this -> v;
+            }
+
+            for (int j=0; j < Ny; j++){
+                for (int i=0; i < Nx; i++){
+                    cout << setw(8) << setprecision(3) << toPrint[j + Ny*i] << "  ";
+                }
+                cout << endl;
+            }
+            
             cout << endl;
         }
-        
-        cout << endl;
     }
-}
 
-void LidDrivenCavity::LDCStatus(int rank){
-    if (this -> rank == rank){
-        cout << "My rank is: " << this -> rank << endl; 
-        cout << "My Coordinates are: (" << this -> coords[0] << " , " << this -> coords[1] << ")" << endl;
-        cout << "My Neighbors are: Down=" << rankShift[0] << "  -- Up =" << rankShift[1] << "  -- Left =" << rankShift[2] << "  -- Right =" << rankShift[3] << endl;
-        cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << " -- dx=" << this -> dx << " -- dy=" << this -> dy << endl << endl;
+    void LidDrivenCavity::LDCStatus(int rank){
+        if (this -> rank == rank){
+            cout << "My rank is: " << this -> rank << endl; 
+            cout << "My Coordinates are: (" << this -> coords[0] << " , " << this -> coords[1] << ")" << endl;
+            cout << "My Neighbors are: Down=" << rankShift[0] << "  -- Up =" << rankShift[1] << "  -- Left =" << rankShift[2] << "  -- Right =" << rankShift[3] << endl;
+            cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << " -- dx=" << this -> dx << " -- dy=" << this -> dy 
+                        << " -- Posx=" << this -> subPos[1] << " -- Posy=" << this -> subPos[0] << endl << endl;
+        }
     }
-}
+
+    void LidDrivenCavity::LDCPrintSolution2File(string filename){
+        // Number of processes
+        int size;
+        MPI_Comm_size(MPIcomm, &size);
+
+        // Index shifter to take into account interface nodes
+        int yShift_Start = 0, yShift_End = 0;
+        int xShift_Start = 0, xShift_End = 0;
+
+        if (rankShift[0] != -2) yShift_Start++;
+        if (rankShift[1] != -2) yShift_End++;
+        if (rankShift[2] != -2) xShift_Start++;
+        if (rankShift[3] != -2) xShift_End++;
+
+        for (int k = 0; k < size; k++){
+            if (k == 0 && rank == 0){
+                // Open file and set as output only and overwrite
+                ofstream vOut(filename, ios::out | ios::trunc);
+
+                // Write Header
+                vOut << "x" << "," << "y" << "," << "s" << "," << "v" << endl;
+
+
+                // (x,y) coordinates of current point
+                double x,y;
+
+                for (int i = xShift_Start; i < (Nx - xShift_End); i++ ){
+                    for (int j = yShift_Start; j < (Ny - yShift_End); j++ ){
+
+                        y = subPos[0] + dy * (j - yShift_Start);
+                        x = subPos[1] + dx * (i - xShift_Start);
+
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << endl;
+                    }
+                }
+                vOut.close();
+            }
+            else if (k == rank){
+                // Open file and set as output only and append
+                ofstream vOut(filename, ios::out | ios::app);
+
+                // (x,y) coordinates of current point
+                double x,y;
+
+                for (int i = xShift_Start; i < (Nx - xShift_End); i++ ){
+                    for (int j = yShift_Start; j < (Ny - yShift_End); j++ ){
+
+                        y = subPos[0] + dy * (j - yShift_Start);
+                        x = subPos[1] + dx * (i - xShift_Start);
+
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << endl;
+                    }
+                }
+
+                vOut.close();
+            }
+            // Ensure file is accessed by a single process at a time
+            MPI_Barrier(MPIcomm);
+        }
+
+    }

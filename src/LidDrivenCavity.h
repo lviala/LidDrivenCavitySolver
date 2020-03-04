@@ -13,7 +13,7 @@ class LidDrivenCavity
 public:
     
     // Constructors
-    LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double T, double Re);
+    LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double* subPos, double T, double Re);
     ~LidDrivenCavity();
 
     // Setters
@@ -50,6 +50,7 @@ public:
     // IO Methods
     void PrintArray(const char* varStr, int rank);
     void LDCStatus(int rank);
+    void LDCPrintSolution2File(string filename);
 
 private:
     // MEMBER CLASSES
@@ -82,6 +83,7 @@ private:
     double dt;
     double dx;
     double dy;
+    double subPos[2];
     double T;
     int    Nx;
     int    Ny;

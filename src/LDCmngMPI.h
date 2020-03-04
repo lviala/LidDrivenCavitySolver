@@ -11,6 +11,6 @@ namespace mngMPI{
     
     bool validateNP(int& np, int* partitionSize);
 
-    void splitGrid(int* gridSize, int* partitionSize, int* coords, int* subGridSize);
+    void splitGrid(int* gridSize, int* partitionSize, int* coords, int* subGridSize, double& dx, double& dy, double* subPos);
 
 }
