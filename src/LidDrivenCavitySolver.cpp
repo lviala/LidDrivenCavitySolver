@@ -81,6 +81,7 @@ int main(int argc, char **argv)
     
     // Initialize solver
     solver->Initialise();
+    solver -> LDCStatus(0);
     
     // Run the solver
     solver->Solve();
