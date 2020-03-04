@@ -236,7 +236,7 @@ LidDrivenCavity::~LidDrivenCavity()
             InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k <= 0; k++ ){
+            for (int k = 0; k <= 5; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);
