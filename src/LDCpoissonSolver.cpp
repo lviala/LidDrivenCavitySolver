@@ -115,7 +115,8 @@ void LDCpoissonSolver::BuildRHS(double* v, double* s){
 void LDCpoissonSolver::SolvePoisson(double* v, double* s){
 
     // Update RHS vector
-    this -> BuildRHS(s,v);
+    this -> BuildRHS(v,s);
+
     // Solve linear system with LAPACK:
     // Packed storage, Symetric Positive definite matrix
     F77NAME(dpptrs) ('U', nNodes, 1, A, b, nNodes, info);

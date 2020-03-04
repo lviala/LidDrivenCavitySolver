@@ -38,8 +38,11 @@ public:
     void UpdateInteriorVorticity();
     void Integrate();
     void Solve();
-    
 
+    // Finite Difference Operator Methods
+     void FDLalplacianOperator(const double& alpha, double* x, double* y);
+     void FDAdvectionOperator(const double& alpha, double* s_new, double* v_old, double* v_new);
+    
     // Interface Management Methods
     void InterfaceBroadcast(double* field);
     void InterfaceGather(double* field);
@@ -67,8 +70,9 @@ private:
 
     // Streamfunction and Vorticity field arrays
     double coeff[3];
-    double* v = nullptr;
     double* s = nullptr;
+    double* v = nullptr;
+    double* v_new = nullptr;
     
     // Buffer arrays for MPI communications
     double* bufNx = nullptr;

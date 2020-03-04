@@ -139,22 +139,19 @@ LidDrivenCavity::~LidDrivenCavity()
         coeff[1] = -2.0*(coeff[0] + coeff[2]);
 
         // Allocate memory to fields and buffers
-        this -> v = new double [Nx*Ny]{};
         this -> s = new double [Nx*Ny]{};
-
-        // TESTER: TO DELETE
-        if (rank == 0){
-            fill_n(v, Nx*Ny, 3);
-            fill_n(s, Nx*Ny, 1);
-        }
-        if(rank == 1 || rank == 3){
-            fill_n(s, Nx*Ny, 2);
-        }
-        //
-
+        this -> v = new double [Nx*Ny]{};
+        this -> v_new = new double [Nx*Ny]{};
+        
+        // Allocate memory to communication buffers
         this -> bufNx = new double [Nx]{};
         this -> bufNy = new double [Ny]{};
 
+        // Initial update of global BCs
+        this -> UpdateGlobalBcs();
+        
+        // Initialize poisson solver object
+        // Builds coefficient matrix and other necessary variables
         poissonSolver = new LDCpoissonSolver(rank);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
@@ -169,53 +166,116 @@ LidDrivenCavity::~LidDrivenCavity()
         // Domain on bottom of cavity if rankshift[0] = -2
         if (rankShift[0] == -2){
             for (int i = 0; i < this -> Nx ; i++){
-                this -> v[i*Ny] = (2/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
+                v[i*Ny] = (2.0/(dy*dy))*(s[i*(Ny)] - s[1 + i*(Ny)]);
             }
         }
 
         // Domain on top of cavity if rankshift[1] = -2
         if (rankShift[1] == -2){
             for (int i = 0; i < this -> Nx ; i++){
-                this -> v[(Ny-1) + i*Ny] = (2/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+                v[(Ny-1) + i*Ny] = (2.0/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
             }
         }
 
         // Domain on left of cavity if rankshift[2] = -2
         if (rankShift[2] == -2){
             for (int j = 0; j < this -> Ny; j++){
-                this -> v[j] = (2/(dx*dx))*(s[j] - s[j + Ny]);
+                v[j] = (2.0/(dx*dx))*(s[j] - s[j + Ny]);
             }
         }
 
         // Domain on right of cavity if rankshift[3] = -2
         if (rankShift[3] == -2){
             for (int j = 0; j < this -> Ny; j++){
-                this -> v[j + (Nx - 1)*Ny] = (2/(dx*dx))*(s[j+ (Nx - 1)*Ny] - s[j + (Nx - 2)*Ny]);
+                v[j + (Nx - 1)*Ny] = (2.0/(dx*dx))*(s[j+ (Nx - 1)*Ny] - s[j + (Nx - 2)*Ny]);
             }
         }
     }
 
-    void LidDrivenCavity::UpdateInteriorVorticity(){
-
-    }
-
     void LidDrivenCavity::Integrate()
-    {
+    {   
+        // Copy the values of v to v_new to preserve BCs
+        F77NAME(dcopy)(Ny*Nx, v, 1, v_new, 1);
+
+        // Overwrite the values of v_new with the laplacian of v
+        FDLalplacianOperator(dt/Re, v, v_new);
+        // Add the contribution of advection to v_new
+        FDAdvectionOperator(dt, s, v, v_new);
         
+        // Add the value of v to v_new
+        for (int i=1; i < Nx-1; i++ ){
+            for (int j=1; j< Ny -1; j++){
+                v_new[ j + Ny*i ] += v[ j + Ny*i ];
+            }
+        }
+
+        // Pass pointer of v_new to v
+        v = v_new;
     }
 
     void LidDrivenCavity::Solve(){
+        double t = 0.0;
+
+        do{
+            // Print solver status to console
+            if(rank == 0){
+                cout << "t = " << t << " of T = " << T << endl;
+            }
+
+            FDLalplacianOperator(-1.0, s, v);
+            
+
+            // Update interface values of the vorticity field
+            InterfaceBroadcast(v);
+            InterfaceGather(v);
+
+            Integrate();
+
+            // Update interface values of the vorticity field
+            InterfaceBroadcast(v);
+            InterfaceGather(v);
+
+            // Solve the poisson problem to update the streamfunction field
+            for (int k = 0; k <= 0; k++ ){
+                // Solve the system until BCs converge between subdomains
+                // Currently hardcoded, should implement residual change
+                poissonSolver -> SolvePoisson(this -> v, this -> s);
+                
+                InterfaceBroadcast(s);
+                InterfaceGather(s);
+            }
+
+            UpdateGlobalBcs();
+
+            // Update time
+            t += dt;
+        }
+        while (t < T);
+    }
+
+//////////////////////////////////////////////////////////////
+// FINITE DIFFERENCE OPERATORS
+
+    void LidDrivenCavity::FDLalplacianOperator(const double& alpha, double* x, double* y){
+        // Overwrites the values of array y with the laplacian of array x
+        // Multiplied by scalar alpha
         
-        InterfaceBroadcast(s);
-        InterfaceGather(s);
+        for (int i=1; i < Nx-1; i++){
+            for (int j=1; j< Ny -1; j++){
+                y[ j + Ny*i ] = alpha*(1.0/(dy*dy)*( x[(j+1) + Ny*i] - 2.0*x[j + Ny*i] + x[(j-1) + Ny*i] ) +
+                                1.0/(dx*dx)*( x[j + Ny*(i+1)] - 2.0*x[j + Ny*i] + x[j + Ny*(i-1)] ));
+            }
+        }
+    }
 
-        for (int k = 0; k <= 5; k++ ){
-            // Solve the system until BCs converge between subdomaina
-            // Currently hardcoded, should implement residual change
-            poissonSolver -> SolvePoisson(this -> v, this -> s);
+    void LidDrivenCavity::FDAdvectionOperator(const double& alpha, double* s, double* v, double* v_new){
+        // Adds the advection component of the momentum equation to the values of array y
 
-            InterfaceBroadcast(s);
-            InterfaceGather(s);
+        for (int i=1; i < Nx-1; i++ ){
+            for (int j=1; j< Ny -1; j++){
+                v_new[j + Ny*i] += alpha * ((0.5/dy)*(v[(j+1) + Ny*i] - v[(j-1) + Ny*i]) * (0.5/dx)*(s[j + Ny*(i+1)] - s[j + Ny*(i-1)]) - 
+                                    (0.5/dy)*(s[(j+1) + Ny*i] - s[(j-1) + Ny*i]) * (0.5/dx)*(v[j + Ny*(i+1)] - v[j + Ny*(i-1)]));
+            }
         }
     }
 
@@ -225,7 +285,7 @@ LidDrivenCavity::~LidDrivenCavity()
     void LidDrivenCavity::InterfaceBroadcast(double* field){
         
         //Sequentially send interface values to neighbors in all directions
-        
+        MPI_Barrier(MPIcomm);
         // Neighbor below
         if (rankShift[0] != -2){
             LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
@@ -271,6 +331,7 @@ LidDrivenCavity::~LidDrivenCavity()
         if (rankShift[2] != -2){
             LidDrivenCavity::InterfaceRecv(Ny, field, bufNy, 1, rankShift[2], rankShift[2], MPIcomm);
         }
+        MPI_Barrier(MPIcomm);
     }
 
 
@@ -304,7 +365,7 @@ void LidDrivenCavity::PrintArray(const char* varStr, int rank) {
 
         for (int j=0; j < Ny; j++){
             for (int i=0; i < Nx; i++){
-                cout << setw(6) << setprecision(3) << toPrint[j + Ny*i] << "  ";
+                cout << setw(8) << setprecision(3) << toPrint[j + Ny*i] << "  ";
             }
             cout << endl;
         }
@@ -318,6 +379,6 @@ void LidDrivenCavity::LDCStatus(int rank){
         cout << "My rank is: " << this -> rank << endl; 
         cout << "My Coordinates are: (" << this -> coords[0] << " , " << this -> coords[1] << ")" << endl;
         cout << "My Neighbors are: Down=" << rankShift[0] << "  -- Up =" << rankShift[1] << "  -- Left =" << rankShift[2] << "  -- Right =" << rankShift[3] << endl;
-        cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << endl << endl;
+        cout << "Nx=" << this -> Nx << " -- Ny=" << this -> Ny << " -- dx=" << this -> dx << " -- dy=" << this -> dy << endl << endl;
     }
 }
