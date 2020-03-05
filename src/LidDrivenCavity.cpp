@@ -38,16 +38,29 @@ extern "C" {
         this -> subPos[0] = subPos[0];
         this -> subPos[1] = subPos[1];
 
-        this -> dt = dt;
         this -> T = T;
         this -> Re = Re;
+
+        // Validate Time step and adjust down if out of bounds
+        if (dt >= 0.25*dx*dy*Re){
+            this -> dt = 0.24*dx*dy*Re;
+
+            if (rank == 0){
+                cout << "*******************************************************" << endl <<
+                        "WARNING: time step adjusted down for stability" << endl << 
+                        " dt = " << this -> dt << endl <<
+                        "*******************************************************" << endl << endl;
+            }
+        }
+        else this -> dt = dt;
+
     }
 
     LidDrivenCavity::~LidDrivenCavity()
     {
         delete poissonSolver;
         delete[] v;
-        delete[] v_new; // Causes error for some reason...
+        delete[] v_new;
         delete[] s;
     }
 
@@ -147,13 +160,13 @@ extern "C" {
         coeff[1] = -2.0*(coeff[0] + coeff[2]);
 
         // Allocate memory to fields and buffers
-        this -> s = new double [Nx*Ny]{};
-        this -> v = new double [Nx*Ny]{};
-        this -> v_new = new double [Nx*Ny]{};
-        
-        // Allocate memory to communication buffers
-        this -> bufNx = new double [Nx]{};
-        this -> bufNy = new double [Ny]{};
+        this -> s       = new double [Nx*Ny]{};
+        this -> v       = new double [Nx*Ny]{};
+        this -> v_new   = new double [Nx*Ny]{};
+        this -> velU    = new double [Nx*Ny]{};
+        this -> velV    = new double [Nx*Ny]{};
+        this -> bufNx   = new double [Nx]{};
+        this -> bufNy   = new double [Ny]{};
 
         // Initial update of global BCs
         this -> UpdateGlobalBcs();
@@ -243,11 +256,11 @@ extern "C" {
             //InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k <= 1; k++ ){
+            for (int k = 0; k <= 0; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);
-                
+
                 InterfaceBroadcast(s);
                 InterfaceGather(s);
             }
@@ -258,6 +271,8 @@ extern "C" {
             t += dt;
         }
         while (t < T);
+
+        FDGradOperator(-1, 1, s, velV, velU);
     }
 
 //////////////////////////////////////////////////////////////
@@ -285,6 +300,15 @@ extern "C" {
             }
         }
     }
+
+     void LidDrivenCavity::FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy){
+        for (int i=1; i < Nx-1; i++ ){
+            for (int j=1; j< Ny-1; j++){
+                df_dx[j + Ny*i] = alpha_x*(0.5/dx)*(v[j + Ny*(i+1)] - v[j + Ny*(i-1)]);
+                df_dy[j + Ny*i] = alpha_y*(0.5/dy)*(v[(j+1) + Ny*i] - v[(j-1) + Ny*i]);
+            }
+        }
+     }
 
 //////////////////////////////////////////////////////////////
 // MPI INTERFACE MANAGEMENT
@@ -411,7 +435,7 @@ extern "C" {
                 ofstream vOut(filename, ios::out | ios::trunc);
 
                 // Write Header
-                vOut << "x" << "," << "y" << "," << "s" << "," << "v" << endl;
+                vOut << "x" << "," << "y" << "," << "s" << "," << "v" << "," << "velU" << "," << "velV" << endl;
 
 
                 // (x,y) coordinates of current point
@@ -423,7 +447,7 @@ extern "C" {
                         y = subPos[0] + dy * (j - yShift_Start);
                         x = subPos[1] + dx * (i - xShift_Start);
 
-                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << endl;
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
                     }
                 }
                 vOut.close();
@@ -441,7 +465,7 @@ extern "C" {
                         y = subPos[0] + dy * (j - yShift_Start);
                         x = subPos[1] + dx * (i - xShift_Start);
 
-                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << endl;
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
                     }
                 }
 

@@ -42,6 +42,7 @@ public:
     // Finite Difference Operator Methods
      void FDLalplacianOperator(const double& alpha, double* x, double* y);
      void FDAdvectionOperator(const double& alpha, double* s_new, double* v_old, double* v_new);
+     void FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy);
     
     // Interface Management Methods
     void InterfaceBroadcast(double* field);
@@ -74,6 +75,10 @@ private:
     double* s = nullptr;
     double* v = nullptr;
     double* v_new = nullptr;
+
+    // Velocity Field Arrays
+    double* velU = nullptr;
+    double* velV = nullptr;
     
     // Buffer arrays for MPI communications
     double* bufNx = nullptr;
