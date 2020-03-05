@@ -47,7 +47,7 @@ extern "C" {
     {
         delete poissonSolver;
         delete[] v;
-        //delete[] v_new; // Causes error for some reason...
+        delete[] v_new; // Causes error for some reason...
         delete[] s;
     }
 
@@ -217,8 +217,7 @@ extern "C" {
             }
         }
 
-        // Pass pointer of v_new to v
-        //v = v_new;
+        // Copy the values of v_new to v to preserve BCs
         F77NAME(dcopy)(Ny*Nx, v_new, 1, v, 1);
     }
 
