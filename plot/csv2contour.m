@@ -3,8 +3,8 @@ clc
 close all
 
 filename = '../N20_dt0p001_T0p01.csv';
-Nx = 50;
-Ny = 50;
+Nx = 161;
+Ny = 161;
 
 %% READ AND SORT
 
