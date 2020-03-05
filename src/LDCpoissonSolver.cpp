@@ -125,7 +125,7 @@ extern "C" {
         // Position solution back in streamfunction array
         int offset = Ny + 2;
         for(int i =0; i<Nx; i++){
-            F77NAME(dcopy) (Ny, b, 1, &s[offset*(i+1) + 1], 1);
+            F77NAME(dcopy) (Ny, &b[i*Ny], 1, &s[offset*(i+1) + 1], 1);
         }
 
     }
@@ -162,5 +162,20 @@ extern "C" {
                 cout << endl;
             }
         
+        }
+    }
+
+    void LDCpoissonSolver::PrintRHS(int rank) {
+
+        if (this -> rank == rank){
+            
+            for (int j=0; j < Ny; j++){
+                for (int i=0; i < Nx; i++){
+                    cout << setw(8) << setprecision(3) << b[j + Ny*i] << "  ";
+                }
+                cout << endl;
+            }
+            
+            cout << endl;
         }
     }

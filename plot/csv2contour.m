@@ -1,6 +1,6 @@
 clear
 clc
-%close all
+close all
 
 filename = '../N20_dt0p001_T0p01.csv';
 Nx = 50;

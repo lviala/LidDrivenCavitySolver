@@ -181,7 +181,7 @@ extern "C" {
         // Domain on top of cavity if rankshift[1] = -2
         if (rankShift[1] == -2){
             for (int i = 0; i < this -> Nx ; i++){
-                v[(Ny-1) + i*Ny] = (2.0/(dy*dy))*(s[(Ny-1) + i*(Ny)] - s[(Ny-2) + i*(Ny)]) - 2.0*U/dy;
+                v[(i+1)*Ny - 1] = (2.0/(dy*dy))*(s[(i+1)*Ny - 1] - s[(i+1)*Ny - 2]) - 2.0*U/dy;
             }
         }
 
@@ -218,7 +218,8 @@ extern "C" {
         }
 
         // Pass pointer of v_new to v
-        v = v_new;
+        //v = v_new;
+        F77NAME(dcopy)(Ny*Nx, v_new, 1, v, 1);
     }
 
     void LidDrivenCavity::Solve(){
@@ -230,21 +231,20 @@ extern "C" {
                 cout << "t = " << t << " of T = " << T << endl;
             }
 
-            FDLalplacianOperator(-1.0, s, v);
-            
+            FDLalplacianOperator(-1.0, this -> s, this -> v);
 
             // Update interface values of the vorticity field
             InterfaceBroadcast(v);
             InterfaceGather(v);
-
+            
             Integrate();
 
             // Update interface values of the vorticity field
-            InterfaceBroadcast(v);
-            InterfaceGather(v);
+            //InterfaceBroadcast(v);
+            //InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k <= 10; k++ ){
+            for (int k = 0; k <= 1; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);
@@ -269,9 +269,9 @@ extern "C" {
         // Multiplied by scalar alpha
         
         for (int i=1; i < Nx-1; i++){
-            for (int j=1; j< Ny -1; j++){
-                y[ j + Ny*i ] = alpha*(1.0/(dy*dy)*( x[(j+1) + Ny*i] - 2.0*x[j + Ny*i] + x[(j-1) + Ny*i] ) +
-                                1.0/(dx*dx)*( x[j + Ny*(i+1)] - 2.0*x[j + Ny*i] + x[j + Ny*(i-1)] ));
+            for (int j=1; j< Ny-1; j++){
+                y[ j + Ny*i ] = alpha*(( x[(j+1) + Ny*i] - 2.0*x[j + Ny*i] + x[(j-1) + Ny*i] )/(dy*dy) +
+                                ( x[j + Ny*(i+1)] - 2.0*x[j + Ny*i] + x[j + Ny*(i-1)] )/(dx*dx));
             }
         }
     }
@@ -280,7 +280,7 @@ extern "C" {
         // Adds the advection component of the momentum equation to the values of array y
 
         for (int i=1; i < Nx-1; i++ ){
-            for (int j=1; j< Ny -1; j++){
+            for (int j=1; j< Ny-1; j++){
                 v_new[j + Ny*i] += alpha * ((0.5/dy)*(v[(j+1) + Ny*i] - v[(j-1) + Ny*i]) * (0.5/dx)*(s[j + Ny*(i+1)] - s[j + Ny*(i-1)]) - 
                                     (0.5/dy)*(s[(j+1) + Ny*i] - s[(j-1) + Ny*i]) * (0.5/dx)*(v[j + Ny*(i+1)] - v[j + Ny*(i-1)]));
             }
@@ -360,14 +360,14 @@ extern "C" {
 
         if (this -> rank == rank){
             
-            cout << "My Rank: " << this -> rank << endl << endl;
-            
             double* toPrint = nullptr;
             
             if (strcmp(varStr,"s") == 0){
+                cout << "My Rank: " << this -> rank << " -- Streamfunction" << endl << endl;
                 toPrint = this -> s;
             }
             else if (strcmp(varStr,"v") == 0){
+                cout << "My Rank: " << this -> rank << " -- Vorticity" << endl << endl;
                 toPrint = this -> v;
             }
 

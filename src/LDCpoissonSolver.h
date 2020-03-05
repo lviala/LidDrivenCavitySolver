@@ -18,6 +18,7 @@ public:
 
     // IO Methods
     void PrintTRIUArray(int rank);
+    void PrintRHS(int rank);
 
 private:
 
