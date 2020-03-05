@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     solver->Solve();
 
     // Output solution
-    solver->LDCPrintSolution2File("N20_dt0p001_T0p01.csv");
+    solver->LDCPrintSolution2File("./results/test.csv");
 
     // Cleanup on program exit
     delete solver;
