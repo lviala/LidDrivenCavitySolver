@@ -447,7 +447,7 @@ extern "C" {
                         y = subPos[0] + dy * (j - yShift_Start);
                         x = subPos[1] + dx * (i - xShift_Start);
 
-                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << "," << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
                     }
                 }
                 vOut.close();
@@ -465,7 +465,7 @@ extern "C" {
                         y = subPos[0] + dy * (j - yShift_Start);
                         x = subPos[1] + dx * (i - xShift_Start);
 
-                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
+                        vOut << x << "," << y << "," << s[j + i*Ny] << "," << v[j + i*Ny] << "," << velU[j + i*Ny] << "," << velV[j + i*Ny] << endl;
                     }
                 }
 
