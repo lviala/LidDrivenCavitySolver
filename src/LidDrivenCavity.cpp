@@ -65,7 +65,7 @@ extern "C" {
         // delete[] velV;
         // delete[] bufNx;
         // delete[] bufNx;
-        // delete poissonSolver;
+        delete poissonSolver;
     }
 
 //////////////////////////////////////////////////////////////
