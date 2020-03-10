@@ -88,10 +88,15 @@ int main(int argc, char **argv)
     // Output solution
     solver->LDCPrintSolution2File("./results/test.csv");
 
+    cout << "hello" << endl;
+
     // Cleanup on program exit
     MPI_Barrier(MPI_COMM_WORLD);
+    cout << "hello1" << endl;
     delete solver;
+    cout << "hello2" << endl;
     MPI_Finalize();
+    cout << "hello3" << endl;
 
 	return 0;
 }
