@@ -58,13 +58,14 @@ extern "C" {
 
     LidDrivenCavity::~LidDrivenCavity()
     {
-        delete[] v;
-        delete[] v_new;
-        delete[] s;
-        delete[] velU;
-        delete[] velV;
-        delete[] bufNx;
-        delete[] bufNx;
+        // delete[] v;
+        // delete[] v_new;
+        // delete[] s;
+        // delete[] velU;
+        // delete[] velV;
+        // delete[] bufNx;
+        // delete[] bufNx;
+        // delete poissonSolver;
     }
 
 //////////////////////////////////////////////////////////////
