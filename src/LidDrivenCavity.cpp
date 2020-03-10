@@ -170,7 +170,7 @@ extern "C" {
 
         // Set lid top velocity
         if (rankShift[1] == -2){
-            for (int i = 1; i < Nx -1 ; i++){
+            for (int i = 0; i < Nx ; i++){
                 velU[i*Ny - 1] = this -> U;
             }
         }
@@ -263,7 +263,7 @@ extern "C" {
             //InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k <= 0; k++ ){
+            for (int k = 0; k <= 5; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);

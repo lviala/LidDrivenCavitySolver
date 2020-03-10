@@ -1,10 +1,10 @@
 clear
 clc
-close all
+%close all
 
 filename = '../results/test.csv';
-Nx = 161;
-Ny = 161;
+Nx = 50;
+Ny = 50;
 
 %% READ AND SORT
 
