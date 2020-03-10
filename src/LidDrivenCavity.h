@@ -11,7 +11,7 @@ class LidDrivenCavity
 {
 
 public:
-    
+
     // Constructors
     LidDrivenCavity(MPI_Comm MPIcomm, int rank, int* rankShift, int* coords, int* gridSize, double dt, double dx, double dy, double* subPos, double T, double Re);
     ~LidDrivenCavity();
@@ -31,7 +31,7 @@ public:
     void getReynoldsNumber(double& Re);
     void getStreamFunction(double* s);
     void getVorticity(double* v);
-    
+
     // Solver Methods
     void Initialise();
     void UpdateGlobalBcs();
@@ -43,11 +43,11 @@ public:
      void FDLalplacianOperator(const double& alpha, double* x, double* y);
      void FDAdvectionOperator(const double& alpha, double* s_new, double* v_old, double* v_new);
      void FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy);
-    
+
     // Interface Management Methods
     void InterfaceBroadcast(double* field);
     void InterfaceGather(double* field);
-    
+
     // IO Methods
     void PrintArray(const char* varStr, int rank);
     void LDCStatus(int rank);
@@ -66,7 +66,7 @@ private:
     int coords[2];// Contains coordinate of subdomain on cartesian grid
 
     // rankShift[0] = rank of process below - rankShift[1] = rank of process above
-    // rankShift[2] = rank of process left - rankShift[3] = rank of process right 
+    // rankShift[2] = rank of process left - rankShift[3] = rank of process right
     int rankShift[4];
     int rank;
 
@@ -75,11 +75,12 @@ private:
     double* s = nullptr;
     double* v = nullptr;
     double* v_new = nullptr;
+    double* test =nullptr;
 
     // Velocity Field Arrays
     double* velU = nullptr;
     double* velV = nullptr;
-    
+
     // Buffer arrays for MPI communications
     double* bufNx = nullptr;
     double* bufNy = nullptr;
