@@ -8,7 +8,7 @@ namespace po = boost::program_options;
 
 #include "LDCprogram_options.h"
 #include "LidDrivenCavity.h"
-#include "LDCpoissonSolver.h"
+#include "LDCpoissonSolver_Packed.h"
 #include "LDCmngMPI.h" // namespace mngMPI
 
 int main(int argc, char **argv)

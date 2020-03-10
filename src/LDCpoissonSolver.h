@@ -11,20 +11,18 @@ class LDCpoissonSolver
 public:
     // Constructor
     LDCpoissonSolver(int rank);
-    ~LDCpoissonSolver();
+    virtual ~LDCpoissonSolver() = default;
 
-    void Initialize(int& Nx, int& Ny, double* coeff);
-    void SolvePoisson(double* v,double* s);
+    virtual void Initialize(int& Nx, int& Ny, double* coeff) = 0;
+    virtual void SolvePoisson(double* v,double* s) = 0;
 
     // IO Methods
-    void PrintTRIUArray(int rank);
     void PrintRHS(int rank);
-
-private:
+    virtual void PrintCoeffMat(int rank) = 0;
+    
+protected:
 
     // Methods
-    void Build2DLaplace();
-    void Factor2DLaplace();
     void BuildRHS(double* v, double* s);
     
     // Linear solver variables

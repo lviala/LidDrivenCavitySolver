@@ -1,6 +1,6 @@
 clear
 clc
-%close all
+close all
 
 filename = '../results/test.csv';
 Nx = 50;

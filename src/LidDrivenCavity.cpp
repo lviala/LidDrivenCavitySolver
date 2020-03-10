@@ -1,5 +1,5 @@
 #include "LidDrivenCavity.h"
-#include "LDCpoissonSolver.h"
+#include "LDCpoissonSolver_Banded.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -180,7 +180,7 @@ extern "C" {
         
         // Initialize poisson solver object
         // Builds coefficient matrix and other necessary variables
-        poissonSolver = new LDCpoissonSolver(rank);
+        poissonSolver = new LDCpoissonSolver_Banded(rank);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
     }

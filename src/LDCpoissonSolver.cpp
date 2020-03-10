@@ -7,14 +7,6 @@
 
 #define F77NAME(x) x##_
 extern "C" {
-    double F77NAME(dpptrf) (const char& UPLO, const int& n,
-                            const double* AP, int& info);
-
-    double F77NAME(dpptrs) (const char& UPLO, const int& n,
-                            const int& nRHS, const double* AP, 
-                            const double* b, const int& ldb,
-                            int& info);
-
     double F77NAME(dcopy) (const int& n,
                           const double *x, const int& incx,
                           const double *y, const int& incy);
@@ -30,67 +22,8 @@ extern "C" {
         this -> rank = rank;
     }
 
-    LDCpoissonSolver::~LDCpoissonSolver(){
-        delete[] A;
-        delete[] b;
-        }
-
 //////////////////////////////////////////////////////////////
 // SOLVERS
-
-    void LDCpoissonSolver::Initialize(int& Nx, int& Ny, double* coeff){
-
-        if(rank == 0){
-            cout << "Initializing Poisson Solver" << endl << endl;
-        }
-
-        this -> Nx = Nx-2;
-        this -> Ny = Ny-2;
-        nNodes = (this -> Nx)*(this -> Ny); // Number of nodes in domain
-        nCoeffs = nNodes*(nNodes+1)/2;
-        
-        // Assign memory to coefficient Matrix A
-        // in LAPACK packed storage format
-        A = new double [nCoeffs]{};
-        b = new double [nNodes]{};
-
-        // Compute coefficients of the 2D FD Laplacian operator
-        this -> coeff[0] = coeff[0];
-        this -> coeff[1] = coeff[1];
-        this -> coeff[2] = coeff[2];
-
-        // Initialize 2D Laplace coefficient matrix and factor
-        this -> Build2DLaplace();
-        this -> Factor2DLaplace();
-        
-    }
-
-    void LDCpoissonSolver::Build2DLaplace(){
-
-        if(rank == 0){
-            cout << "Building Coefficient matrix" <<  endl << endl;
-        }
-
-        // Index of diagonal entry
-        int idDiag;
-
-        for (int i=0; i<nNodes; i++) {
-
-            idDiag = (i+1)*(i+2)/2 -1 ;
-            //  Populate diagonal entries
-            A[idDiag] = coeff[1];
-
-            // Populate y-direction neighbor
-            if (i % Ny != 0){
-                A[idDiag - 1] = coeff[0];
-            }
-
-            if (i >= Ny) {
-                // Populate x-direction neighbor
-                A[idDiag - Ny] = coeff[2];
-            }
-        }
-    }
 
     void LDCpoissonSolver::BuildRHS(double* v, double* s){
 
@@ -113,57 +46,9 @@ extern "C" {
 
     }
 
-    void LDCpoissonSolver::SolvePoisson(double* v, double* s){
-
-        // Update RHS vector
-        this -> BuildRHS(v,s);
-
-        // Solve linear system with LAPACK:
-        // Packed storage, Symetric Positive definite matrix
-        F77NAME(dpptrs) ('U', nNodes, 1, A, b, nNodes, info);
-
-        // Position solution back in streamfunction array
-        int offset = Ny + 2;
-        for(int i =0; i<Nx; i++){
-            F77NAME(dcopy) (Ny, &b[i*Ny], 1, &s[offset*(i+1) + 1], 1);
-        }
-
-    }
-
-    void LDCpoissonSolver::Factor2DLaplace(){
-        
-        if (rank ==0 ){
-            cout << "Computing coefficient matrix factor" << endl;
-        }
-
-        F77NAME(dpptrf) ('U', nNodes, A, info);
-        
-    }
 
 //////////////////////////////////////////////////////////////
 // IO METHODS
-
-    void LDCpoissonSolver::PrintTRIUArray(int rank){
-        if (this -> rank == rank ){
-
-            cout << "Nx=" << Nx << "  -  Ny=" << Ny  << "  -  nNodes=" << nNodes << "  -  nCoeffs=" << nCoeffs << endl << endl;
-
-            
-            for (int i = 0; i < nNodes; i++){
-                for (int j = 0; j < nNodes; j++){
-                    
-                    if (i <= j){
-                        cout << setw(8) << setprecision(3) <<  A[(i) + j*(j+1)/2];
-                    }
-                    else {
-                        cout << setw(8) << "";
-                    }
-                }
-                cout << endl;
-            }
-        
-        }
-    }
 
     void LDCpoissonSolver::PrintRHS(int rank) {
 

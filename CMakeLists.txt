@@ -18,7 +18,7 @@ INCLUDE_DIRECTORIES(${BLAS_INCLUDE_DIR})
 find_package(LAPACK REQUIRED)
 INCLUDE_DIRECTORIES(${LAPACK_INCLUDE_DIR})
 
-add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCpoissonSolver.cpp src/LDCprogram_options.cpp src/LDCmngMPI.cpp)
+add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCpoissonSolver.cpp src/LDCpoissonSolver_Packed.cpp src/LDCpoissonSolver_Banded.cpp src/LDCprogram_options.cpp src/LDCmngMPI.cpp)
 
 TARGET_LINK_LIBRARIES( LidDrivenCavitySolver ${Boost_LIBRARIES} ${MPI_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 set_target_properties(LidDrivenCavitySolver PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
