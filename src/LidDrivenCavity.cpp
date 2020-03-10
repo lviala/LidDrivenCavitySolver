@@ -43,7 +43,7 @@ extern "C" {
 
         // Validate Time step and adjust down if out of bounds
         if (dt >= 0.25*dx*dy*Re){
-            this -> dt = 0.24*dx*dy*Re;
+            this -> dt = 0.2*dx*dy*Re;
 
             if (rank == 0){
                 cout << "*******************************************************" << endl <<
@@ -167,6 +167,13 @@ extern "C" {
         this -> velV    = new double [Nx*Ny]{};
         this -> bufNx   = new double [Nx]{};
         this -> bufNy   = new double [Ny]{};
+
+        // Set lid top velocity
+        if (rankShift[1] == -2){
+            for (int i = 1; i < Nx -1 ; i++){
+                velU[i*Ny - 1] = this -> U;
+            }
+        }
 
         // Initial update of global BCs
         this -> UpdateGlobalBcs();
@@ -302,10 +309,13 @@ extern "C" {
     }
 
      void LidDrivenCavity::FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy){
+        
+         // One sided difference for boundary nodes
+
         for (int i=1; i < Nx-1; i++ ){
             for (int j=1; j< Ny-1; j++){
-                df_dx[j + Ny*i] = alpha_x*(0.5/dx)*(v[j + Ny*(i+1)] - v[j + Ny*(i-1)]);
-                df_dy[j + Ny*i] = alpha_y*(0.5/dy)*(v[(j+1) + Ny*i] - v[(j-1) + Ny*i]);
+                df_dx[j + Ny*i] = alpha_x*(0.5/dx)*(f[j + Ny*(i+1)] - f[j + Ny*(i-1)]);
+                df_dy[j + Ny*i] = alpha_y*(0.5/dy)*(f[(j+1) + Ny*i] - f[(j-1) + Ny*i]);
             }
         }
      }
