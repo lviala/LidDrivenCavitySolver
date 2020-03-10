@@ -61,10 +61,10 @@ extern "C" {
         // delete[] v;
         // delete[] v_new;
         // delete[] s;
-        // delete[] velU;
-        // delete[] velV;
-        delete[] bufNx;
-        delete[] bufNx;
+         delete[] velU;
+         delete[] velV;
+        // delete[] bufNx;
+        // delete[] bufNx;
         delete poissonSolver;
     }
 
