@@ -89,6 +89,7 @@ int main(int argc, char **argv)
     solver->LDCPrintSolution2File("./results/test.csv");
 
     // Cleanup on program exit
+    MPI_Barrier(MPI_COMM_WORLD);
     delete solver;
     MPI_Finalize();
 

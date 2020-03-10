@@ -60,7 +60,6 @@ extern "C" {
 
         // Initialize 2D Laplace coefficient matrix and factor
         this -> Build2DLaplace();
-        this -> PrintCoeffMat(0);
         this -> Factor2DLaplace();
         
     }
