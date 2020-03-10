@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     // Cleanup on program exit
     MPI_Barrier(MPI_COMM_WORLD);
     cout << "hello1" << endl;
-    delete solver;
+    //delete solver;
     cout << "hello2" << endl;
     MPI_Finalize();
     cout << "hello3" << endl;
