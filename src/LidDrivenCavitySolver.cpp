@@ -12,7 +12,7 @@ namespace po = boost::program_options;
 #include "LDCmngMPI.h" // namespace mngMPI
 
 int main(int argc, char **argv)
-{   
+{
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE MPI, READ AND VALIDATE INPUTS
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     // If number of processes is not compatible with domain
     // domain partitions return 1 and exit;
     if (!mngMPI::validateNP(size, partitionSize)){
-        
+
         if (rank == 0){
         cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
                 << "np = Px * Py" << endl << endl
@@ -75,28 +75,22 @@ int main(int argc, char **argv)
     int subGridSize[2];
     double subPos[2];
     mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize, xStep, yStep, subPos);
-    
+
     // Create a new instance of the LidDrivenCavity class
     LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD, rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, subPos, finalTime, reynoldsNumber);
-    
+
     // Initialize solver
     solver->Initialise();
-    
+
     // Run the solver
     solver->Solve();
 
     // Output solution
     solver->LDCPrintSolution2File("./results/test.csv");
 
-    cout << "hello" << endl;
-
     // Cleanup on program exit
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << "hello1" << endl;
     delete solver;
-    cout << "hello2" << endl;
     MPI_Finalize();
-    cout << "hello3" << endl;
 
 	return 0;
 }

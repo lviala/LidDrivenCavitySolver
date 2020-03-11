@@ -8,7 +8,7 @@
 #define F77NAME(x) x##_
 extern "C" {
     double F77NAME(dpbtrf) (const char& UPLO, const int& n,
-                            const int& kd, const double* AB, 
+                            const int& kd, const double* AB,
                             const int& ldab, int& info);
 
     double F77NAME(dpbtrs) (const char& UPLO, const int& n,
@@ -47,7 +47,7 @@ extern "C" {
         this -> Ny = Ny-2;
         nNodes = (this -> Nx)*(this -> Ny); // Number of nodes in domain
         nCoeffs = nNodes * (this -> Ny+1);
-        
+
         // Assign memory to coefficient Matrix A
         // in LAPACK packed storage format
         A = new double [nCoeffs]{};
@@ -61,7 +61,7 @@ extern "C" {
         // Initialize 2D Laplace coefficient matrix and factor
         this -> Build2DLaplace();
         this -> Factor2DLaplace();
-        
+
     }
 
     void LDCpoissonSolver_Banded::Build2DLaplace(){
@@ -71,13 +71,13 @@ extern "C" {
         }
 
         // First diagonal entry
-        int kd = Ny +1; // Number of superdiagonals 
+        int kd = Ny +1; // Number of superdiagonals
 
         A[Ny] = coeff[1];
 
         // Populate coefficient matrix
         for (int i=1; i<nNodes; i++) {
-            
+
             // Diagonal entries
             A[(i+1)*kd - 1] = coeff[1];
 
@@ -132,13 +132,12 @@ extern "C" {
     }
 
     void LDCpoissonSolver_Banded::Factor2DLaplace(){
-        
+
         if (rank ==0 ){
             cout << "Computing coefficient matrix factor" << endl;
         }
 
         F77NAME(dpbtrf) ('U', nNodes, Ny, A, Ny+1, info);
-        cout << "success" << endl;
     }
 
 //////////////////////////////////////////////////////////////
@@ -151,25 +150,25 @@ extern "C" {
 
             for (int j = 0; j < Ny+1 ; j++){
                 for (int i = 0; i < nNodes; i++){
-                    cout << setw(8) << setprecision(3) << A[j + i*(Ny + 1) ];        
+                    cout << setw(8) << setprecision(3) << A[j + i*(Ny + 1) ];
                 }
-                cout << endl;   
+                cout << endl;
             }
-        
+
         }
     }
 
     void LDCpoissonSolver_Banded::PrintRHS(int rank) {
 
         if (this -> rank == rank){
-            
+
             for (int j=0; j < Ny + 1 ; j++){
                 for (int i=0; i < Nx; i++){
                     cout << setw(8) << setprecision(3) << b[j + Ny*i] << "  ";
                 }
                 cout << endl;
             }
-            
+
             cout << endl;
         }
     }

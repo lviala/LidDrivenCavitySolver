@@ -1,0 +1,4 @@
+### Start Wed Mar 11 14:14:09 2020
+# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x10.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x10.er
+Copying `/lib/x86_64-linux-gnu/librt-2.28.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/librt-2.28.so_XLwlkF_Wwof'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so.40.10.3'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libmpi.so.40.10.3_G6zcWprHF51'

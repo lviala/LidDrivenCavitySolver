@@ -1,0 +1,16 @@
+### Start Wed Mar 11 14:14:09 2020
+# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x16.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x16.er
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_reachable_weighted.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_reachable_weighted.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_schizo_flux.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_schizo_flux.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_schizo_slurm.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_schizo_slurm.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_schizo_ompi.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_schizo_ompi.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_ess_pmi.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_ess_pmi.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_pmix_flux.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_pmix_flux.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/pmix/mca_bfrops_v12.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_bfrops_v12.so_BR66kV2Xe40'
+Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/pmix/mca_bfrops_v20.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_bfrops_v20.so_BR66kV2Xe40'
+Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/pmix/mca_bfrops_v21.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_bfrops_v21.so_BR66kV2Xe40'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_pml_ob1.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_pml_ob1.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_coll_spacc.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_coll_spacc.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_coll_monitoring.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_coll_monitoring.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_coll_self.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_coll_self.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_coll_inter.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_coll_inter.so_1fcNkoDIWK0'
