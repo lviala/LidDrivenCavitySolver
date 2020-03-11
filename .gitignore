@@ -1,3 +1,4 @@
-build/
+﻿build/
 .vscode/
 results/
+initial.er/
