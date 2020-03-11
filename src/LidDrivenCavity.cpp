@@ -330,7 +330,7 @@ extern "C" {
     void LidDrivenCavity::InterfaceBroadcast(double* field){
 
         //Sequentially send interface values to neighbors in all directions
-        MPI_Barrier(MPIcomm);
+
         // Neighbor below
         if (rankShift[0] != -2){
             LidDrivenCavity::InterfaceSend(Nx, &field[1], bufNx, Ny, rankShift[0],rank,MPIcomm);
@@ -350,7 +350,6 @@ extern "C" {
         if (rankShift[3] != -2){
             LidDrivenCavity::InterfaceSend(Ny, &field[Ny*(Nx-2)], bufNy, 1, rankShift[3],rank,MPIcomm);
         }
-
     }
 
     void LidDrivenCavity::InterfaceGather(double* field){
@@ -376,7 +375,6 @@ extern "C" {
         if (rankShift[2] != -2){
             LidDrivenCavity::InterfaceRecv(Ny, field, bufNy, 1, rankShift[2], rankShift[2], MPIcomm);
         }
-        MPI_Barrier(MPIcomm);
     }
 
 
