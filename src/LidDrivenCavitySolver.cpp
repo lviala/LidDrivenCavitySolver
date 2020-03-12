@@ -8,11 +8,11 @@ namespace po = boost::program_options;
 
 #include "LDCprogram_options.h"
 #include "LidDrivenCavity.h"
-#include "LDCpoissonSolver.h"
+#include "LDCpoissonSolver_Packed.h"
 #include "LDCmngMPI.h" // namespace mngMPI
 
 int main(int argc, char **argv)
-{   
+{
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE MPI, READ AND VALIDATE INPUTS
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     // If number of processes is not compatible with domain
     // domain partitions return 1 and exit;
     if (!mngMPI::validateNP(size, partitionSize)){
-        
+
         if (rank == 0){
         cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
                 << "np = Px * Py" << endl << endl
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     // Initialize cartesian grid communicator
     MPI_Comm cartGrid;
     int periods[2] = {0, 0}, coords[2];
-    int dest, reorder = 0;
+    int reorder = 0;
     MPI_Cart_create(MPI_COMM_WORLD, 2, partitionSize, periods, reorder, &cartGrid);
     MPI_Cart_coords(cartGrid, rank, 2, coords);
 
@@ -73,15 +73,15 @@ int main(int argc, char **argv)
 
     // Compute number of nodes assigned to subdomain
     int subGridSize[2];
-    double subDomainSize[2], subPos[2];
+    double subPos[2];
     mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize, xStep, yStep, subPos);
-    
+
     // Create a new instance of the LidDrivenCavity class
     LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD, rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, subPos, finalTime, reynoldsNumber);
-    
+
     // Initialize solver
     solver->Initialise();
-    
+
     // Run the solver
     solver->Solve();
 

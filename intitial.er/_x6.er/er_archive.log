@@ -1,0 +1,13 @@
+### Start Wed Mar 11 14:14:09 2020
+# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x6.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x6.er
+Copying `/usr/lib/x86_64-linux-gnu/libltdl.so.7.3.1'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libltdl.so.7.3.1_dnWuQRcLhw9'
+Copying `/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libgfortran.so.5.0.0_dnWuQRcLhw9'
+Copying `/usr/lib/x86_64-linux-gnu/libhwloc.so.5.7.9'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libhwloc.so.5.7.9_dnWuQRcLhw9'
+Copying `/lib/x86_64-linux-gnu/libutil-2.28.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libutil-2.28.so_XLwlkF_Wwof'
+Copying `/usr/lib/x86_64-linux-gnu/libicudata.so.63.1'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libicudata.so.63.1_dnWuQRcLhw9'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so.40.10.0'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libmpi_cxx.so.40.10.0_G6zcWprHF51'
+Copying `/usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.67.0'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libboost_program_options.so.1.67.0_dnWuQRcLhw9'
+Copying `/usr/lib/x86_64-linux-gnu/libboost_iostreams.so.1.67.0'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libboost_iostreams.so.1.67.0_dnWuQRcLhw9'
+Copying `/apps/dev-studio/12.6/lib/analyzer/amd64/runtime/libcollector.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libcollector.so_kN_xj2QRtH5'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_shmem_posix.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_shmem_posix.so_1fcNkoDIWK0'
+Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_shmem_mmap.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_shmem_mmap.so_1fcNkoDIWK0'

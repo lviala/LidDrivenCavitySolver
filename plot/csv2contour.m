@@ -3,8 +3,8 @@ clc
 %close all
 
 filename = '../results/test.csv';
-Nx = 50;
-Ny = 50;
+Nx = 161;
+Ny = 161;
 
 %% READ AND SORT
 
@@ -23,27 +23,28 @@ velV    = reshape(A(:,6),Ny,Nx);
 %% PLOT
 
 figure();
+subplot(2,2,1)
 contourf(X,Y,S);
 title('Lid driven cavity problem - streamfuntion contour')
 xlabel('x')
 ylabel('y')
 colorbar()
 
-figure();
+subplot(2,2,2)
 contourf(X,Y,V);
 title('Lid driven cavity problem - vorticity contour')
 xlabel('x')
 ylabel('y')
 colorbar()
 
-figure();
+subplot(2,2,3)
 contourf(X,Y,velU);
 title('Lid driven cavity problem - U velocity')
 xlabel('x')
 ylabel('y')
 colorbar()
 
-figure();
+subplot(2,2,4)
 contourf(X,Y,velV);
 title('Lid driven cavity problem - V velocity')
 xlabel('x')
