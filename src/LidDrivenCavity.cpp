@@ -13,6 +13,10 @@ extern "C" {
                           const double *y, const int& incy);
     
     double F77NAME(dnrm2) (const int& n, const double* x, const int& incx);
+
+    double F77NAME(daxpy) (const int& n, const double& alpha,
+                          const double *x, const int& incx,
+                          const double *y, const int& incy);
 }
 
 //////////////////////////////////////////////////////////////
@@ -273,8 +277,6 @@ extern "C" {
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);
-
-                
 
                 InterfaceBroadcast(s);
                 InterfaceGather(s);
