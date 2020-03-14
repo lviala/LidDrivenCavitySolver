@@ -157,13 +157,13 @@ extern "C" {
             InterfaceBroadcast(p);
             InterfaceGather(Ap);
 
-            if (rank == 0){
-                cout << endl << endl;
-                for (int i = 0; i < nNodes; i++){
-                    cout << p[i] << "   " << Ap[i] << endl;
-                }
-                cout << endl << endl;
-            }
+            // if (rank == 0){
+            //     cout << endl << endl;
+            //     for (int i = 0; i < nNodes; i++){
+            //         cout << p[i] << "   " << Ap[i] << endl;
+            //     }
+            //     cout << endl << endl;
+            // }
             
 
             // Compute pTAp
