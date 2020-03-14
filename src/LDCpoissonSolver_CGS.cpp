@@ -166,15 +166,6 @@ extern "C" {
             InterfaceBroadcast(p);
             InterfaceGather(Ap);
 
-            // if (rank == 0){
-            //     cout << endl << endl;
-            //     for (int i = 0; i < nNodes; i++){
-            //         cout << p[i] << "   " << Ap[i] << endl;
-            //     }
-            //     cout << endl << endl;
-            // }
-            
-
             // Compute pTAp
             F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 1.0, Ap, 1);
 
@@ -196,7 +187,7 @@ extern "C" {
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
 
-            if (k > 1000 || dotR < 0.000001){
+            if (k > 1000 || dotR < 0.0000001){
                 break;
             }
 
