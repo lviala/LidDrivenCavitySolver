@@ -154,8 +154,17 @@ extern "C" {
 
             // Reset and Update Ap vector
             fill_n(Ap,nNodes,0.0);
-            //InterfaceBroadcast(p);
-            //InterfaceGather(Ap);
+            InterfaceBroadcast(p);
+            InterfaceGather(Ap);
+
+            if (rank == 0){
+                cout << endl << endl;
+                for (int i = 0; i < nNodes; i++){
+                    cout << p[i] << "   " << Ap[i] << endl;
+                }
+                cout << endl << endl;
+            }
+            
 
             // Compute pTAp
             F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 1.0, Ap, 1);
@@ -178,7 +187,7 @@ extern "C" {
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
 
-            if (k > 100 || dotR < 0.00000001){
+            if (k > 5 || dotR < 0.000001){
                 break;
             }
 
@@ -196,6 +205,8 @@ extern "C" {
         for(int i =0; i<Nx; i++){
             F77NAME(dcopy) (Ny, &u[i*Ny], 1, &s[offset*(i+1) + 1], 1);
         }
+
+        cout << "Solver converged to tolerance in " << k << " iterations" << endl;
     }
 
 //////////////////////////////////////////////////////////////
@@ -259,7 +270,8 @@ extern "C" {
 
     void LDCpoissonSolver_CGS::InterfaceRecv(int& count, double& alpha, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
         MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
-        F77NAME(daxpy) (count, alpha, buff, 1, field, disp);
+        F77NAME(dscal) (count, alpha, buff, 1);
+        F77NAME(dcopy) (count, buff, 1, field, disp);
     }
 
 //////////////////////////////////////////////////////////////

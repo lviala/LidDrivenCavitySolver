@@ -18,9 +18,6 @@ INCLUDE_DIRECTORIES(${BLAS_INCLUDE_DIR})
 find_package(LAPACK REQUIRED)
 INCLUDE_DIRECTORIES(${LAPACK_INCLUDE_DIR})
 
-find_package(SCALAPACK REQUIRED)
-INCLUDE_DIRECTORIES(${SCALAPACK_INCLUDE_DIR})
-
 add_executable(LidDrivenCavitySolver src/LidDrivenCavitySolver.cpp src/LidDrivenCavity.cpp src/LDCpoissonSolver.cpp 
                 src/LDCpoissonSolver_Packed.cpp src/LDCpoissonSolver_Banded.cpp src/LDCpoissonSolver_CGS.cpp 
                 src/LDCprogram_options.cpp src/LDCmngMPI.cpp)
