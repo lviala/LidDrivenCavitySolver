@@ -132,12 +132,12 @@ extern "C" {
             F77NAME(dsbmv) ('U', nNodes, Ny, -1.0, A, Ny + 1, u, 1, 1.0, r, 1);
 
             // Neigbhor values x-direction
-            F77NAME(daxpy) (Ny, coeff[2], &s[1], 1, r, 1);
-            F77NAME(daxpy) (Ny, coeff[2], &s[offset*(Nx+1) + 1], 1, &r[Ny*(Nx-1)], 1);
+            F77NAME(daxpy) (Ny, -coeff[2], &s[1], 1, r, 1);
+            F77NAME(daxpy) (Ny, -coeff[2], &s[offset*(Nx+1) + 1], 1, &r[Ny*(Nx-1)], 1);
 
             // Neighbor values y-direction
-            F77NAME(daxpy) (Nx, coeff[0], &s[Ny +2], (Ny + 2), r, Ny);
-            F77NAME(daxpy) (Nx, coeff[0], &s[2*(Ny +2) - 1], (Ny + 2), &r[Ny-1], Ny);
+            F77NAME(daxpy) (Nx, -coeff[0], &s[Ny +2], (Ny + 2), r, Ny);
+            F77NAME(daxpy) (Nx, -coeff[0], &s[2*(Ny +2) - 1], (Ny + 2), &r[Ny-1], Ny);
 
         F77NAME(dcopy) (nNodes, r, 1, p, 1);
 
@@ -187,7 +187,7 @@ extern "C" {
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
 
-            if (k > 5 || dotR < 0.000001){
+            if (k > 1000 || dotR < 0.000001){
                 break;
             }
 
