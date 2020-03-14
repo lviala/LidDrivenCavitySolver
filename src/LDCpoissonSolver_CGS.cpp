@@ -116,7 +116,7 @@ extern "C" {
 
         int offset = Ny + 2, k = 0;
 
-        double dotR = 1000, dotR_prev, dotP;
+        double dotR, dotR_prev, dotP;
         double alpha, beta;
 
         // Update forcing vector
@@ -154,8 +154,8 @@ extern "C" {
 
             // Reset and Update Ap vector
             fill_n(Ap,nNodes,0.0);
-            InterfaceBroadcast(p);
-            InterfaceGather(Ap);
+            //InterfaceBroadcast(p);
+            //InterfaceGather(Ap);
 
             // Compute pTAp
             F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 1.0, Ap, 1);
@@ -177,12 +177,8 @@ extern "C" {
             dotR = F77NAME(ddot) (nNodes, r, 1, r, 1);
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
-            if(rank == 0){
-            cout << "Iteration Number: " << k <<  " -- Residual = " << dotR << endl;
-            }
 
-
-            if (k > 10 || dotR < 0.000001){
+            if (k > 100 || dotR < 0.00000001){
                 break;
             }
 
