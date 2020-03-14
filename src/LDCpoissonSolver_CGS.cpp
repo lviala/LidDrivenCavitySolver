@@ -35,7 +35,10 @@ extern "C" {
 
     LDCpoissonSolver_CGS::~LDCpoissonSolver_CGS(){
         delete[] A;
-        delete[] b;
+        delete[] Ap;
+        delete[] p;
+        delete[] r;
+        delete[] u;
         }
 
 //////////////////////////////////////////////////////////////
@@ -79,6 +82,9 @@ extern "C" {
             cout << "Building Coefficient matrix - Banded storage" <<  endl << endl;
         }
 
+        cout << "Building matrix -- rank: " << rank << " -- Nx: " << Nx << " -- Ny: " << Ny << " -- nNodes: " << nNodes << endl;
+        MPI_Barrier(MPIcomm);
+
         // First diagonal entry
         int kd = Ny +1; // Number of superdiagonals
 
@@ -100,6 +106,9 @@ extern "C" {
                 A[(i+1)*kd] = coeff[2];
             }
         }
+
+        cout << "Built matrix -- rank: " << rank << endl;
+        MPI_Barrier(MPIcomm);
     }
 
     void LDCpoissonSolver_CGS::BuildRHS(double* v, double* s){
@@ -206,7 +215,9 @@ extern "C" {
             F77NAME(dcopy) (Ny, &u[i*Ny], 1, &s[offset*(i+1) + 1], 1);
         }
 
-        cout << "Solver converged to tolerance in " << k << " iterations" << endl;
+        if (rank == 0){
+            cout << "Solver converged to tolerance in " << k << " iterations" << endl;
+        }
     }
 
 //////////////////////////////////////////////////////////////
