@@ -8,23 +8,26 @@
 #define F77NAME(x) x##_
 extern "C" {
     double F77NAME(dsbmv) (const char& UPLO, const int& n,
-                          const int& k, const double alpha,
+                          const int& k, const double& alpha,
                           const double* A, const int& lda,
                           const double* x, const int& incx,
                           const double& beta, const double* y, 
                           const int& incy);
 
     double F77NAME(dcopy) (const int& n,
-                          const double *x, const int& incx,
-                          const double *y, const int& incy);
+                          const double* x, const int& incx,
+                          const double* y, const int& incy);
 
     double F77NAME(daxpy) (const int& n, const double& alpha,
-                          const double *x, const int& incx,
-                          const double *y, const int& incy);
+                          const double* x, const int& incx,
+                          const double* y, const int& incy);
 
     double F77NAME(ddot) (const int& n, const double* x,
                          const int& incx, const double* y,
                          const int& incy);
+
+    double F77NAME(dscal) (const int& n, const double& alpha,
+                          const double* x, const int& incx);
 }
 
 //////////////////////////////////////////////////////////////
@@ -43,7 +46,6 @@ extern "C" {
         if(rank == 0){
             cout << "Initializing Poisson Solver" << endl << endl;
         }
-
         this -> Nx = Nx-2;
         this -> Ny = Ny-2;
         nNodes = (this -> Nx)*(this -> Ny); // Number of nodes in domain
@@ -51,10 +53,16 @@ extern "C" {
 
         // Assign memory to coefficient Matrix A
         // in LAPACK packed storage format
-        A = new double [nCoeffs]{};
-        p = new double [nNodes]{};
-        r = new double [nNodes]{};
-        u = new double [nNodes]{};
+        A  = new double [nCoeffs]{};
+        Ap = new double [nNodes]{};
+        p  = new double [nNodes]{};
+        r  = new double [nNodes]{};
+        u  = new double [nNodes]{};
+
+        // Assign memory to parallel MatVec multiplication buffer arrays
+        matvecbuf_Nx = new double [this -> Nx]{};
+        matvecbuf_Ny = new double [this -> Ny]{};
+
 
         // Compute coefficients of the 2D FD Laplacian operator
         this -> coeff[0] = coeff[0];
@@ -96,8 +104,6 @@ extern "C" {
 
     void LDCpoissonSolver_CGS::BuildRHS(double* v, double* s){
 
-        // Reset RHS vector
-        fill_n(b,nNodes,0.0);
         int offset = Ny + 2;
 
         // Populate vorticity forcing values
@@ -110,7 +116,7 @@ extern "C" {
 
         int offset = Ny + 2, k = 0;
 
-        double dotR, dotR_prev, dotP;
+        double dotR = 1000, dotR_prev, dotP;
         double alpha, beta;
 
         // Update forcing vector
@@ -121,23 +127,42 @@ extern "C" {
             F77NAME(dcopy) (Ny, &s[offset*(i+1) + 1], 1, &u[i*Ny], 1);
         }
 
-        // Initialize r vector, p vector
-        F77NAME(dsbmv) ('U', nNodes, Ny, -1.0, A, nNodes, u, 1, -1.0, r, 1);
+        // Initialize r vector, adding contribution of neighbor nodes to mat-vec product
+
+            F77NAME(dsbmv) ('U', nNodes, Ny, -1.0, A, Ny + 1, u, 1, 1.0, r, 1);
+
+            // Neigbhor values x-direction
+            F77NAME(daxpy) (Ny, coeff[2], &s[1], 1, r, 1);
+            F77NAME(daxpy) (Ny, coeff[2], &s[offset*(Nx+1) + 1], 1, &r[Ny*(Nx-1)], 1);
+
+            // Neighbor values y-direction
+            F77NAME(daxpy) (Nx, coeff[0], &s[Ny +2], (Ny + 2), r, Ny);
+            F77NAME(daxpy) (Nx, coeff[0], &s[2*(Ny +2) - 1], (Ny + 2), &r[Ny-1], Ny);
+
         F77NAME(dcopy) (nNodes, r, 1, p, 1);
 
         // Compute local/global r_prev-dot products
         dotR_prev = F77NAME(ddot) (nNodes, r, 1, r, 1);
-        MPI_Allreduce(MPI_IN_PLACE, &dotR_prev, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
+        MPI_Allreduce(MPI_IN_PLACE, &dotR_prev, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
         /////////////// ITERATE
 
         while (true){
-            // Update p vector
+
+            // Update iteration count
+            k++;
+
+            // Reset and Update Ap vector
+            fill_n(Ap,nNodes,0.0);
+            InterfaceBroadcast(p);
+            InterfaceGather(Ap);
+
+            // Compute pTAp
+            F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 1.0, Ap, 1);
 
             // Compute local/global p-dot products
-            dotP = F77NAME(ddot) (nNodes, p, 1, p, 1);
-            MPI_Allreduce(MPI_IN_PLACE, &dotP, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            dotP = F77NAME(ddot) (nNodes, p, 1, Ap, 1);
+            MPI_Allreduce(MPI_IN_PLACE, &dotP, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
             // Update alpha
             alpha = dotR_prev / dotP;
@@ -146,12 +171,18 @@ extern "C" {
             F77NAME(daxpy) (nNodes, alpha, p, 1, u, 1);
 
             // Update r
+            F77NAME(daxpy) (nNodes, -alpha, Ap, 1, r, 1);
 
             // Compute local/global r-dot products
             dotR = F77NAME(ddot) (nNodes, r, 1, r, 1);
-            MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
-            if (k < 1000 || dotR < 1e-3){
+            if(rank == 0){
+            cout << "Iteration Number: " << k <<  " -- Residual = " << dotR << endl;
+            }
+
+
+            if (k > 10 || dotR < 0.000001){
                 break;
             }
 
@@ -160,31 +191,80 @@ extern "C" {
             dotR_prev = dotR;
 
             // Update p vector
-            F77NAME(daxpy) (nNodes, )
-
-            k++;
+            F77NAME(dscal) (nNodes, beta, p, 1);
+            F77NAME(daxpy) (nNodes, 1, r, 1, p, 1);
 
         } 
-        
-
-
-
-        
-        // Populate streamfunction BC values x-direction
-        F77NAME(daxpy) (Ny, -coeff[2], &s[1], 1, b, 1);
-        F77NAME(daxpy) (Ny, -coeff[2], &s[offset*(Nx+1) + 1], 1, &b[Ny*(Nx-1)], 1);
-
-        // Populate streamfunction BC values y-direction
-        F77NAME(daxpy) (Nx, -coeff[0], &s[Ny +2], (Ny + 2), b, Ny);
-        F77NAME(daxpy) (Nx, -coeff[0], &s[2*(Ny +2) - 1], (Ny + 2), &b[Ny-1], Ny);
 
         // Position solution back in streamfunction array
-        int offset = Ny + 2;
         for(int i =0; i<Nx; i++){
-            F77NAME(dcopy) (Ny, &b[i*Ny], 1, &s[offset*(i+1) + 1], 1);
+            F77NAME(dcopy) (Ny, &u[i*Ny], 1, &s[offset*(i+1) + 1], 1);
         }
     }
 
+//////////////////////////////////////////////////////////////
+// MPI INTERFACE MANAGEMENT
+
+    void LDCpoissonSolver_CGS::InterfaceBroadcast(double* field){
+
+        //Sequentially send interface values to neighbors in all directions
+
+        // Neighbor below
+        if (rankShift[0] != -2){
+            LDCpoissonSolver_CGS::InterfaceSend(Nx, field, matvecbuf_Nx, Ny, rankShift[0], rank, MPIcomm);
+        }
+
+        // Neighbor above
+        if (rankShift[1] != -2){
+            LDCpoissonSolver_CGS::InterfaceSend(Nx, &field[Ny-1], matvecbuf_Nx, Ny, rankShift[1], rank, MPIcomm);
+        }
+
+        // Neighbor leftward
+        if (rankShift[2] != -2){
+            LDCpoissonSolver_CGS::InterfaceSend(Ny, field, matvecbuf_Ny, 1, rankShift[2], rank, MPIcomm);
+        }
+
+        // Neighbor rightward
+        if (rankShift[3] != -2){
+            LDCpoissonSolver_CGS::InterfaceSend(Ny, &field[Ny*(Nx-1)], matvecbuf_Ny, 1, rankShift[3], rank, MPIcomm);
+        }
+    }
+
+    void LDCpoissonSolver_CGS::InterfaceGather(double* field){
+
+        //Sequentially send interface values to neighbors in all directions
+
+        //Neighbor above
+        if (rankShift[1] != -2){
+            LDCpoissonSolver_CGS::InterfaceRecv(Nx, coeff[0], &field[Ny-1], matvecbuf_Nx, Ny, rankShift[1], rankShift[1], MPIcomm);
+        }
+
+        //Neighbor below
+        if (rankShift[0] != -2){
+            LDCpoissonSolver_CGS::InterfaceRecv(Nx, coeff[0], field, matvecbuf_Nx, Ny, rankShift[0], rankShift[0], MPIcomm);
+        }
+
+        //Neighbor rightward
+        if (rankShift[3] != -2){
+            LDCpoissonSolver_CGS::InterfaceRecv(Ny, coeff[2], &field[Ny*(Nx-1)], matvecbuf_Ny, 1, rankShift[3], rankShift[3], MPIcomm);
+        }
+
+        //Neighbor leftward
+        if (rankShift[2] != -2){
+            LDCpoissonSolver_CGS::InterfaceRecv(Ny, coeff[2], field, matvecbuf_Ny, 1, rankShift[2], rankShift[2], MPIcomm);
+        }
+    }
+
+
+    void LDCpoissonSolver_CGS::InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm){
+        F77NAME(dcopy) (count, field, disp, buff, 1);
+        MPI_Send(buff, count, MPI_DOUBLE, dest, tag, MPIcomm);
+    }
+
+    void LDCpoissonSolver_CGS::InterfaceRecv(int& count, double& alpha, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
+        MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
+        F77NAME(daxpy) (count, alpha, buff, 1, field, disp);
+    }
 
 //////////////////////////////////////////////////////////////
 // IO METHODS

@@ -1,5 +1,6 @@
 #include "LidDrivenCavity.h"
 #include "LDCpoissonSolver_Banded.h"
+#include "LDCpoissonSolver_CGS.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -190,7 +191,8 @@ extern "C" {
 
         // Initialize poisson solver object
         // Builds coefficient matrix and other necessary variables
-        poissonSolver = new LDCpoissonSolver_Banded(rank);
+        //poissonSolver = new LDCpoissonSolver_Banded(rank);
+        poissonSolver = new LDCpoissonSolver_CGS(rank, rankShift, MPIcomm);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
     }
@@ -273,7 +275,7 @@ extern "C" {
             //InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k < 5; k++ ){
+            for (int k = 0; k < 1; k++ ){
                 // Solve the system until BCs converge between subdomains
                 // Currently hardcoded, should implement residual change
                 poissonSolver -> SolvePoisson(this -> v, this -> s);

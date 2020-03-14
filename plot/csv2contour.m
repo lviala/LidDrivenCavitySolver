@@ -31,7 +31,7 @@ ylabel('y')
 colorbar()
 
 subplot(2,2,2)
-contourf(X,Y,V);
+contourf(X,Y,V, linspace(-5,5,11));
 title('Lid driven cavity problem - vorticity contour')
 xlabel('x')
 ylabel('y')
