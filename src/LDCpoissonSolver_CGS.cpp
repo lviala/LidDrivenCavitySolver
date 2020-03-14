@@ -162,12 +162,12 @@ extern "C" {
             k++;
 
             // Reset and Update Ap vector
-            fill_n(Ap,nNodes,0.0);
-            InterfaceBroadcast(p);
-            InterfaceGather(Ap);
+            //fill_n(Ap,nNodes,0.0);
 
             // Compute pTAp
-            F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 1.0, Ap, 1);
+            F77NAME(dsbmv) ('U', nNodes, Ny, 1.0, A, Ny + 1, p, 1, 0.0, Ap, 1);
+            InterfaceBroadcast(p);
+            InterfaceGather(Ap);
 
             // Compute local/global p-dot products
             dotP = F77NAME(ddot) (nNodes, p, 1, Ap, 1);
