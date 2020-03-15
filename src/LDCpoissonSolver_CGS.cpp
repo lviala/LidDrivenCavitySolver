@@ -186,7 +186,7 @@ extern "C" {
             dotR = F77NAME(ddot) (nNodes, r, 1, r, 1);
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
-
+            // Check convergence and max iteration criteria
             if (k > 1000 || dotR < 0.0000001){
                 break;
             }
