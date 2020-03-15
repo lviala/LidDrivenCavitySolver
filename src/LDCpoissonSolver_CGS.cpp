@@ -273,7 +273,7 @@ extern "C" {
     void LDCpoissonSolver_CGS::InterfaceRecv(int& count, double& alpha, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
         MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
         F77NAME(dscal) (count, alpha, buff, 1);
-        F77NAME(dcopy) (count, buff, 1, field, disp);
+        F77NAME(daxpy) (count,1.0, buff, 1, field, disp);
     }
 
 //////////////////////////////////////////////////////////////
