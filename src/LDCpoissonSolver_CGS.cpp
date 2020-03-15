@@ -65,7 +65,7 @@ extern "C" {
         nCoeffs = nNodes * (this -> Ny+1);
 
         // Assign memory to coefficient Matrix A
-        // in LAPACK packed storage format
+        // in BLAS banded storage format
         A  = new double [nCoeffs]{};
         Ap = new double [nNodes]{};
         p  = new double [nNodes]{};
@@ -82,7 +82,7 @@ extern "C" {
         this -> coeff[1] = coeff[1];
         this -> coeff[2] = coeff[2];
 
-        // Initialize 2D Laplace coefficient matrix and factor
+        // Initialize 2D Laplace coefficient matrix
         this -> Build2DLaplace();
     }
 
@@ -91,9 +91,6 @@ extern "C" {
         if(rank == 0){
             cout << "Building Coefficient matrix - Banded storage" <<  endl << endl;
         }
-
-        cout << "Building matrix -- rank: " << rank << " -- Nx: " << Nx << " -- Ny: " << Ny << " -- nNodes: " << nNodes << endl;
-        MPI_Barrier(MPIcomm);
 
         // First diagonal entry
         int kd = Ny +1; // Number of superdiagonals
@@ -116,9 +113,6 @@ extern "C" {
                 A[(i+1)*kd] = coeff[2];
             }
         }
-
-        cout << "Built matrix -- rank: " << rank << endl;
-        MPI_Barrier(MPIcomm);
     }
 
     void LDCpoissonSolver_CGS::BuildRHS(double* v, double* s){
@@ -132,9 +126,10 @@ extern "C" {
     }
 
     void LDCpoissonSolver_CGS::SolvePoisson(double* v, double* s){
+        // Implements a parallel Conjugate Gradient solver
 
+        // Declare local solver variables
         int offset = Ny + 2, k = 0;
-
         double dotR, dotR_prev, dotP;
         double alpha, beta;
 
@@ -147,7 +142,6 @@ extern "C" {
         }
 
         // Initialize r vector, adding contribution of neighbor nodes to mat-vec product
-
             F77NAME(dsbmv) ('U', nNodes, Ny, -1.0, A, Ny + 1, u, 1, 1.0, r, 1);
 
             // Neigbhor values x-direction
@@ -165,7 +159,6 @@ extern "C" {
         MPI_Allreduce(MPI_IN_PLACE, &dotR_prev, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
         /////////////// ITERATE
-
         while (true){
 
             // Update iteration count
@@ -197,7 +190,10 @@ extern "C" {
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
             // Check convergence and max iteration criteria
-            if (k > 1000 || dotR < 0.0000001){
+            int iter_max = 1000; // Adjust as needed
+            double res_crit = 0.0000001; // Adjust as needed
+
+            if (k > iter_max || dotR < res_crit){
                 break;
             }
 
@@ -274,12 +270,13 @@ extern "C" {
         }
     }
 
-
+    // Copy into buffer and send to target
     void LDCpoissonSolver_CGS::InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm){
         F77NAME(dcopy) (count, field, disp, buff, 1);
         MPI_Send(buff, count, MPI_DOUBLE, dest, tag, MPIcomm);
     }
 
+    // Receive into buffer then scale and add to target field
     void LDCpoissonSolver_CGS::InterfaceRecv(int& count, double& alpha, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
         MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
         F77NAME(daxpy) (count,alpha, buff, 1, field, disp);

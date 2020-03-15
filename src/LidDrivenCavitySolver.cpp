@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     LDCsetVar(vm, gridSize, partitionSize, domainSize, timeStep, xStep, yStep, finalTime, reynoldsNumber );
 
     // If number of processes is not compatible with domain
-    // domain partitions return 1 and exit;
+    // partitions return 0 and exit;
     if (!mngMPI::validateNP(size, partitionSize)){
 
         if (rank == 0){
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
     }
 
     // Validate time step restriction condition dt >= 0.25*dx*dy*Re
+    // If invalid, return 0 and exit
     if (timeStep >= 0.25 * xStep * yStep * reynoldsNumber){
         if (rank == 0){
             cout << endl << "Invalid time step dt = " << timeStep << endl
@@ -83,6 +84,7 @@ int main(int argc, char **argv)
     MPI_Cart_create(MPI_COMM_WORLD, 2, partitionSize, periods, reorder, &cartGrid);
     MPI_Cart_coords(cartGrid, rank, 2, coords);
 
+    // Compute neighbor process ranks
     int rankShift[4] = {rank,rank,rank,rank};
     MPI_Cart_shift(cartGrid, 0, 1, &rankShift[0], &rankShift[1]);
     MPI_Cart_shift(cartGrid, 1, 1, &rankShift[2], &rankShift[3]);
@@ -101,7 +103,7 @@ int main(int argc, char **argv)
     // Run the solver
     solver->Solve();
 
-    // Output solution
+    // Output solution to file
     solver->LDCPrintSolution2File("./results/test.csv");
 
     // Cleanup on program exit

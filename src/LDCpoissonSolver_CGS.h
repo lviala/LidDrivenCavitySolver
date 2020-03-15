@@ -18,6 +18,7 @@ public:
                          this -> rankShift[1] = rankShift[1];
                          this -> rankShift[2] = rankShift[2];
                          this -> rankShift[3] = rankShift[3];}
+                         
     ~LDCpoissonSolver_CGS();
 
     virtual void Initialize(int& Nx, int& Ny, double* coeff);
