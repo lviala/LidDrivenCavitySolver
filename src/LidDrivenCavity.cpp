@@ -47,31 +47,19 @@ extern "C" {
 
         this -> T = T;
         this -> Re = Re;
-
-        // Validate Time step and adjust down if out of bounds
-        if (dt >= 0.25*dx*dy*Re){
-            this -> dt = 0.2*dx*dy*Re;
-
-            if (rank == 0){
-                cout << "*******************************************************" << endl <<
-                        "WARNING: time step adjusted down for stability" << endl <<
-                        " dt = " << this -> dt << endl <<
-                        "*******************************************************" << endl << endl;
-            }
-        }
-        else this -> dt = dt;
+        this -> dt = dt;
 
     }
 
     LidDrivenCavity::~LidDrivenCavity()
     {
-        // delete[] v;
-        // delete[] v_new;
-        // delete[] s;
-        // delete[] velU;
-        // delete[] velV;
-        // delete[] bufNx;
-        // delete[] bufNy;
+        delete[] v;
+        delete[] v_new;
+        delete[] s;
+        delete[] velU;
+        delete[] velV;
+        delete[] bufNx;
+        delete[] bufNy;
         delete poissonSolver;
     }
 

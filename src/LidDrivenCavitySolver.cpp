@@ -48,14 +48,30 @@ int main(int argc, char **argv)
     if (!mngMPI::validateNP(size, partitionSize)){
 
         if (rank == 0){
-        cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
-                << "np = Px * Py" << endl << endl
-                << "Program complete with exit code 0" << endl;
+            cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
+                    << "np = Px * Py" << endl << endl
+                    << "Program complete with exit code 0" << endl;
         }
 
         MPI_Finalize();
         return 0;
     }
+
+    // Validate time step restriction condition dt >= 0.25*dx*dy*Re
+    if (timeStep >= 0.25 * xStep * yStep * reynoldsNumber){
+        if (rank == 0){
+            cout << endl << "Invalid time step dt = " << timeStep << endl
+                    << "Time step must satisfy the following condition:" << endl
+                    << "dt >= 0.25 * dx * dy * Re" << endl
+                    << "For the chosen values of dx, dy, Re, please enter a time step such that: " << endl
+                    << "dt <=  " << 0.25 * xStep * yStep * reynoldsNumber << endl << endl
+                    << "Program complete with exit code 0" << endl;
+        }
+
+        MPI_Finalize();
+        return 0;
+    }
+    
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE SUBDOMAIN
