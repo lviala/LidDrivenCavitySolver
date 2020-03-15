@@ -32,21 +32,9 @@ public:
     void getStreamFunction(double* s);
     void getVorticity(double* v);
 
-    // Solver Methods
+    // Public solver Methods
     void Initialise();
-    void UpdateGlobalBcs();
-    void UpdateInteriorVorticity();
-    void Integrate();
     void Solve();
-
-    // Finite Difference Operator Methods
-     void FDLalplacianOperator(const double& alpha, double* x, double* y);
-     void FDAdvectionOperator(const double& alpha, double* s_new, double* v_old, double* v_new);
-     void FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy);
-
-    // Interface Management Methods
-    void InterfaceBroadcast(double* field);
-    void InterfaceGather(double* field);
 
     // IO Methods
     void PrintArray(const char* varStr, int rank);
@@ -58,7 +46,19 @@ private:
     MPI_Comm MPIcomm;
     LDCpoissonSolver* poissonSolver;
 
-    // MEMBER METHODS
+    // Solver methods
+    void UpdateGlobalBcs();
+    void UpdateInteriorVorticity();
+    void Integrate();
+
+    // Finite Difference Operator Methods
+    void FDLalplacianOperator(const double& alpha, double* x, double* y);
+    void FDAdvectionOperator(const double& alpha, double* s_new, double* v_old, double* v_new);
+    void FDCurlOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy);
+
+    // Interface Management Methods
+    void InterfaceBroadcast(double* field);
+    void InterfaceGather(double* field);
     void InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm);
     void InterfaceRecv(int& count, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm);
 

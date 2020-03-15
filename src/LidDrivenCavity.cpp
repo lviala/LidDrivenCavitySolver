@@ -2,19 +2,21 @@
 #include "LDCpoissonSolver_Banded.h"
 #include "LDCpoissonSolver_CGS.h"
 #include <iostream>
-#include <iomanip>
 #include <fstream>
-#include <cstring>
 #include <mpi.h>
 
 #define F77NAME(x) x##_
+// Definition of BLAS functions
 extern "C" {
+    // Y = X
     double F77NAME(dcopy) (const int& n,
                           const double *x, const int& incx,
                           const double *y, const int& incy);
     
+    // Norm2 of vector
     double F77NAME(dnrm2) (const int& n, const double* x, const int& incx);
-
+    
+    // Y = alpha*X + Y
     double F77NAME(daxpy) (const int& n, const double& alpha,
                           const double *x, const int& incx,
                           const double *y, const int& incy);
@@ -179,7 +181,7 @@ extern "C" {
 
         // Initialize poisson solver object
         // Builds coefficient matrix and other necessary variables
-        //poissonSolver = new LDCpoissonSolver_Banded(rank);
+            
         poissonSolver = new LDCpoissonSolver_CGS(rank, rankShift, MPIcomm);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
@@ -231,12 +233,8 @@ extern "C" {
         FDAdvectionOperator(dt, s, v, v_new);
 
         // Add the value of v to v_new
-        for (int i=1; i < Nx-1; i++ ){
-            for (int j=1; j< Ny -1; j++){
-                v_new[ j + Ny*i ] += v[ j + Ny*i ];
-            }
-        }
-
+        F77NAME(daxpy) (Nx*Ny -2, 1.0, &v[1], 1, &v_new[1], 1);
+        
         // Copy the values of v_new to v to preserve BCs
         F77NAME(dcopy)(Ny*Nx, v_new, 1, v, 1);
     }
@@ -250,28 +248,28 @@ extern "C" {
                 cout << "t = " << t << " of T = " << T << endl;
             }
 
+            // Update vorticity field
             FDLalplacianOperator(-1.0, this -> s, this -> v);
 
             // Update interface values of the vorticity field
             InterfaceBroadcast(v);
             InterfaceGather(v);
 
+            // Forward time step
             Integrate();
 
             // Update interface values of the vorticity field
-            //InterfaceBroadcast(v);
-            //InterfaceGather(v);
+            InterfaceBroadcast(v);
+            InterfaceGather(v);
 
             // Solve the poisson problem to update the streamfunction field
-            for (int k = 0; k < 1; k++ ){
-                // Solve the system until BCs converge between subdomains
-                // Currently hardcoded, should implement residual change
-                poissonSolver -> SolvePoisson(this -> v, this -> s);
+            poissonSolver -> SolvePoisson(this -> v, this -> s);
 
-                InterfaceBroadcast(s);
-                InterfaceGather(s);
-            }
+            // Update interface values of the streamfunction field
+            InterfaceBroadcast(s);
+            InterfaceGather(s);
 
+            // Update global boundary conditions
             UpdateGlobalBcs();
 
             // Update time
@@ -279,7 +277,8 @@ extern "C" {
         }
         while (t < T);
 
-        FDGradOperator(-1, 1, s, velV, velU);
+        // On solver completion, compute U and V velocity fields
+        FDCurlOperator(-1, 1, s, velV, velU);
     }
 
 //////////////////////////////////////////////////////////////
@@ -308,10 +307,7 @@ extern "C" {
         }
     }
 
-     void LidDrivenCavity::FDGradOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy){
-
-         // One sided difference for boundary nodes
-
+     void LidDrivenCavity::FDCurlOperator(double alpha_x, double alpha_y, double* f, double* df_dx, double* df_dy){
         for (int i=1; i < Nx-1; i++ ){
             for (int j=1; j< Ny-1; j++){
                 df_dx[j + Ny*i] = alpha_x*(0.5/dx)*(f[j + Ny*(i+1)] - f[j + Ny*(i-1)]);
@@ -373,12 +369,13 @@ extern "C" {
         }
     }
 
-
+    // Copy into buffer and send to target
     void LidDrivenCavity::InterfaceSend(int& count, double* field, double* buff, int disp, int& dest, int& tag, MPI_Comm MPIcomm){
         F77NAME(dcopy) (count, field, disp, buff, 1);
         MPI_Send(buff, count, MPI_DOUBLE, dest, tag, MPIcomm);
     }
 
+    // Receive into buffer and copy into target field
     void LidDrivenCavity::InterfaceRecv(int& count, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
         MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
         F77NAME(dcopy) (count, buff, 1, field, disp);
@@ -424,6 +421,10 @@ extern "C" {
     }
 
     void LidDrivenCavity::LDCPrintSolution2File(string filename){
+        // Sequentially write solution to csv file
+        // Every process opens, writes into, and closes file
+        // Only one process can have the file open at one time
+
         // Number of processes
         int size;
         MPI_Comm_size(MPIcomm, &size);
@@ -438,13 +439,12 @@ extern "C" {
         if (rankShift[3] != -2) xShift_End++;
 
         for (int k = 0; k < size; k++){
-            if (k == 0 && rank == 0){
+            if (k == 0 && rank == 0){ // Only for rank 0 and first write operation
                 // Open file and set as output only and overwrite
                 ofstream vOut(filename, ios::out | ios::trunc);
 
                 // Write Header
                 vOut << "x" << "," << "y" << "," << "s" << "," << "v" << "," << "velU" << "," << "velV" << endl;
-
 
                 // (x,y) coordinates of current point
                 double x,y;

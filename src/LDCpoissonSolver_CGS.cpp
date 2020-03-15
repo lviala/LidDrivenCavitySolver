@@ -6,7 +6,11 @@
 #include "LDCpoissonSolver_CGS.h"
 
 #define F77NAME(x) x##_
+
+// Definition of BLAS functions
 extern "C" {
+    // Matrix Vector Multiplication
+    // Matrix stored in symmetric banded format
     double F77NAME(dsbmv) (const char& UPLO, const int& n,
                           const int& k, const double& alpha,
                           const double* A, const int& lda,
@@ -14,18 +18,22 @@ extern "C" {
                           const double& beta, const double* y, 
                           const int& incy);
 
+    // Y = X
     double F77NAME(dcopy) (const int& n,
                           const double* x, const int& incx,
                           const double* y, const int& incy);
 
+    // Y = alpha*X + Y
     double F77NAME(daxpy) (const int& n, const double& alpha,
                           const double* x, const int& incx,
                           const double* y, const int& incy);
 
+    // ddot = X_T * X
     double F77NAME(ddot) (const int& n, const double* x,
                          const int& incx, const double* y,
                          const int& incy);
 
+    // Y = alpha * Y
     double F77NAME(dscal) (const int& n, const double& alpha,
                           const double* x, const int& incx);
 }
@@ -41,7 +49,7 @@ extern "C" {
         delete[] u;
         delete[] matvecbuf_Nx;
         delete[] matvecbuf_Ny;
-        }
+    }
 
 //////////////////////////////////////////////////////////////
 // SOLVERS
@@ -274,8 +282,7 @@ extern "C" {
 
     void LDCpoissonSolver_CGS::InterfaceRecv(int& count, double& alpha, double* field, double* buff, int disp, int& source, int& tag, MPI_Comm MPIcomm){
         MPI_Recv(buff, count, MPI_DOUBLE, source, tag, MPIcomm, MPI_STATUS_IGNORE);
-        F77NAME(dscal) (count, alpha, buff, 1);
-        F77NAME(daxpy) (count,1.0, buff, 1, field, disp);
+        F77NAME(daxpy) (count,alpha, buff, 1, field, disp);
     }
 
 //////////////////////////////////////////////////////////////
