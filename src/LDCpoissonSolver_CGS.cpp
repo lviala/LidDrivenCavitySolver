@@ -39,6 +39,8 @@ extern "C" {
         delete[] p;
         delete[] r;
         delete[] u;
+        delete[] matvecbuf_Nx;
+        delete[] matvecbuf_Ny;
         }
 
 //////////////////////////////////////////////////////////////
