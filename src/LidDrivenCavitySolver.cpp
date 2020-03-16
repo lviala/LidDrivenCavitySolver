@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <iterator>
 #include <mpi.h>
 using namespace std;
@@ -104,7 +105,15 @@ int main(int argc, char **argv)
     solver->Solve();
 
     // Output solution to file
-    solver->LDCPrintSolution2File("./results/test.csv");
+    string resultsOutputPath;
+    resultsOutputPath = string("results/LDCoutput_Nx") + to_string(gridSize[1]) + 
+                        string("_Ny_") + to_string(gridSize[0]) + 
+                        string("_T_") + to_string(int(finalTime)) + 
+                        string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
+
+    cout << "File output to: " << resultsOutputPath << endl;
+
+    solver->LDCPrintSolution2File(resultsOutputPath);
 
     // Cleanup on program exit
     delete solver;
