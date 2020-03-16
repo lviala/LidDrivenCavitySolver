@@ -2,9 +2,9 @@ clear
 clc
 %close all
 
-filename = '../results/test.csv';
-Nx = 50;
-Ny = 50;
+filename = '../results/LDCoutput_Nx161_Ny_161_T_100_Re_1000.csv';
+Nx = 161;
+Ny = 161;
 
 %% READ AND SORT
 
