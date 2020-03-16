@@ -106,9 +106,9 @@ int main(int argc, char **argv)
 
     // Output solution to file
     string resultsOutputPath;
-    resultsOutputPath = string("results/LDCoutput_") + 
-                        string("Lx") + to_string(domainSize[1]) + string("_Ly_") + to_string(domainSize[0]) + 
-                        string("Nx") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) + 
+    resultsOutputPath = string("results/LDCoutput") + 
+                        string("_Lx_") + to_string(int(domainSize[1])) + string("_Ly_") + to_string(int(domainSize[0])) + 
+                        string("_Nx_") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) + 
                         string("_T_") + to_string(int(finalTime)) + 
                         string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
 
