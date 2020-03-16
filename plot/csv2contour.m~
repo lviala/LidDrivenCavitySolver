@@ -3,8 +3,8 @@ clc
 %close all
 
 filename = '../results/test.csv';
-Nx = 161;
-Ny = 161;
+Nx = 50;
+Ny = 50s;
 
 %% READ AND SORT
 
