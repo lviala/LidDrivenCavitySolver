@@ -1,5 +1,0 @@
-### Start Wed Mar 11 14:14:09 2020
-# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x11.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x11.er
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/libopen-pal.so.40.10.3'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libopen-pal.so.40.10.3_G6zcWprHF51'
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/libopen-rte.so.40.10.3'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libopen-rte.so.40.10.3_G6zcWprHF51'
-Copying `/usr/lib/x86_64-linux-gnu/atlas/libblas.so.3.10.3'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libblas.so.3.10.3_IiHvjNbM48a'

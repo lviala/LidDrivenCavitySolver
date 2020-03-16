@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <iterator>
 #include <mpi.h>
 using namespace std;
@@ -44,18 +45,35 @@ int main(int argc, char **argv)
     LDCsetVar(vm, gridSize, partitionSize, domainSize, timeStep, xStep, yStep, finalTime, reynoldsNumber );
 
     // If number of processes is not compatible with domain
-    // domain partitions return 1 and exit;
+    // partitions return 0 and exit;
     if (!mngMPI::validateNP(size, partitionSize)){
 
         if (rank == 0){
-        cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
-                << "np = Px * Py" << endl << endl
-                << "Program complete with exit code 0" << endl;
+            cout << endl << "Please enter a valid combination of processes and domain partitions such that:" << endl
+                    << "np = Px * Py" << endl << endl
+                    << "Program complete with exit code 0" << endl;
         }
 
         MPI_Finalize();
         return 0;
     }
+
+    // Validate time step restriction condition dt >= 0.25*dx*dy*Re
+    // If invalid, return 0 and exit
+    if (timeStep >= 0.25 * xStep * yStep * reynoldsNumber){
+        if (rank == 0){
+            cout << endl << "Invalid time step dt = " << timeStep << endl
+                    << "Time step must satisfy the following condition:" << endl
+                    << "dt >= 0.25 * dx * dy * Re" << endl
+                    << "For the chosen values of dx, dy, Re, please enter a time step such that: " << endl
+                    << "dt <=  " << 0.25 * xStep * yStep * reynoldsNumber << endl << endl
+                    << "Program complete with exit code 0" << endl;
+        }
+
+        MPI_Finalize();
+        return 0;
+    }
+    
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE SUBDOMAIN
@@ -67,6 +85,7 @@ int main(int argc, char **argv)
     MPI_Cart_create(MPI_COMM_WORLD, 2, partitionSize, periods, reorder, &cartGrid);
     MPI_Cart_coords(cartGrid, rank, 2, coords);
 
+    // Compute neighbor process ranks
     int rankShift[4] = {rank,rank,rank,rank};
     MPI_Cart_shift(cartGrid, 0, 1, &rankShift[0], &rankShift[1]);
     MPI_Cart_shift(cartGrid, 1, 1, &rankShift[2], &rankShift[3]);
@@ -85,8 +104,17 @@ int main(int argc, char **argv)
     // Run the solver
     solver->Solve();
 
-    // Output solution
-    solver->LDCPrintSolution2File("./results/test.csv");
+    // Output solution to file
+    string resultsOutputPath;
+    resultsOutputPath = string("results/LDCoutput_") + 
+                        string("Lx") + to_string(domainSize[1]) + string("_Ly_") + to_string(domainSize[0]) + 
+                        string("Nx") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) + 
+                        string("_T_") + to_string(int(finalTime)) + 
+                        string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
+
+    cout << "File output to: " << resultsOutputPath << endl;
+
+    solver->LDCPrintSolution2File(resultsOutputPath);
 
     // Cleanup on program exit
     delete solver;

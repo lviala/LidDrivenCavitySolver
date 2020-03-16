@@ -7,10 +7,12 @@
 
 #define F77NAME(x) x##_
 extern "C" {
+    // Y = X
     double F77NAME(dcopy) (const int& n,
                           const double *x, const int& incx,
                           const double *y, const int& incy);
 
+    // Y = alpha*X + Y
     double F77NAME(daxpy) (const int& n, const double& alpha,
                           const double *x, const int& incx,
                           const double *y, const int& incy);

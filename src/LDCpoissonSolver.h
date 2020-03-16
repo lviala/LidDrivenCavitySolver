@@ -7,12 +7,16 @@
 using namespace std;
 
 class LDCpoissonSolver
+// Abstract class implement common logic to solving linear system
+// Solving algorithm specific methods are left as virtual
+// Allows flexibility to implement different algorithms as needed
 {
 public:
     // Constructor
     LDCpoissonSolver(int rank);
     virtual ~LDCpoissonSolver() = default;
 
+    // Solver Methods
     virtual void Initialize(int& Nx, int& Ny, double* coeff) = 0;
     virtual void SolvePoisson(double* v,double* s) = 0;
 
@@ -22,7 +26,7 @@ public:
     
 protected:
 
-    // Methods
+    // Solver Methods
     void BuildRHS(double* v, double* s);
     
     // Linear solver variables

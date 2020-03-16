@@ -1,7 +1,0 @@
-### Start Wed Mar 11 14:14:09 2020
-# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x7.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x7.er
-Copying `/usr/lib/x86_64-linux-gnu/libevent-2.1.so.6.0.2'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libevent-2.1.so.6.0.2_dnWuQRcLhw9'
-Copying `/lib/x86_64-linux-gnu/libbz2.so.1.0.4'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libbz2.so.1.0.4_XLwlkF_Wwof'
-Copying `/lib/x86_64-linux-gnu/libpthread-2.28.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libpthread-2.28.so_XLwlkF_Wwof'
-Copying `/lib/x86_64-linux-gnu/libc-2.28.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libc-2.28.so_XLwlkF_Wwof'
-Copying `/usr/lib/x86_64-linux-gnu/atlas/liblapack.so.3.10.3'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/liblapack.so.3.10.3_IiHvjNbM48a'

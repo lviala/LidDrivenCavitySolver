@@ -10,7 +10,7 @@ using namespace std;
 bool LDCprogram_options(int argc, char** argv, po::variables_map& vm, int& rank) {
 
     po::options_description desc("Allowed options");
-    // Specify allowed options
+    // Specify allowed options and default values
     desc.add_options()
         ("help" , "Produce help message.")
         ("Lx" , po::value<double>() -> default_value(1.0)    , "Length of the domain in the x-direction.")
@@ -19,8 +19,8 @@ bool LDCprogram_options(int argc, char** argv, po::variables_map& vm, int& rank)
         ("Ny" , po::value<int>() -> default_value(161)       , "Number of grid points in y-direction.")
         ("Px" , po::value<int>() -> default_value(1)         , "Number of partitions in x-direction.")
         ("Py" , po::value<int>() -> default_value(1)         , "Number of partitions in y-direction.")
-        ("dt" , po::value<double>() -> default_value(0.01)   , "Time step size.")
-        ("T"  , po::value<double>() -> default_value(10.0)   , "Final time.")
+        ("dt" , po::value<double>() -> default_value(0.001)   , "Time step size.")
+        ("T"  , po::value<double>() -> default_value(100.0)   , "Final time.")
         ("Re" , po::value<double>() -> default_value(1000.0) , "Reynolds number.")
     ;
 
@@ -46,6 +46,7 @@ void LDCsetVar(po::variables_map& vm,
                     int* gridSize, int* partitionSize, double* domainSize, 
                     double& timeStep, double& xStep, double& yStep, 
                     double& finalTime, double& reynoldsNumber) {
+    // Pass command line arguments to program variable
 
     // Note: working in column-major format: y-direction to be 0-direction
     gridSize[1] = vm["Nx"].as<int>();
