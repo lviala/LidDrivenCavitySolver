@@ -2,7 +2,7 @@ clear
 clc
 %close all
 
-filename = '../results/LDCoutput_Nx161_Ny_161_T_100_Re_1000.csv';
+filename = '../results/LDCoutput_Nx161_Ny_161_T_100_Re_3200.csv';
 Nx = 161;
 Ny = 161;
 

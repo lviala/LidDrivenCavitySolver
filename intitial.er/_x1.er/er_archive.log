@@ -1,9 +1,0 @@
-### Start Wed Mar 11 14:14:09 2020
-# /apps/dev-studio/12.6/bin/../bin/er_archive -n -O /home/lv713/LidDrivenCavitySolver/intitial.er/_x1.er/er_archive.log /home/lv713/LidDrivenCavitySolver/intitial.er/_x1.er
-Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/libpmix.so.2.2.22'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/libpmix.so.2.2.22_MKg0UYzQ2Kd'
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_pmix_ext2x.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_pmix_ext2x.so_1fcNkoDIWK0'
-Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/pmix/mca_bfrops_v3.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_bfrops_v3.so_BR66kV2Xe40'
-Copying `/usr/lib/x86_64-linux-gnu/pmix/lib/pmix/mca_ptl_tcp.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_ptl_tcp.so_BR66kV2Xe40'
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_dfs_app.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_dfs_app.so_1fcNkoDIWK0'
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_dfs_test.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_dfs_test.so_1fcNkoDIWK0'
-Copying `/usr/lib/x86_64-linux-gnu/openmpi/lib/openmpi3/mca_allocator_bucket.so'  to `/home/lv713/LidDrivenCavitySolver/intitial.er/archives/mca_allocator_bucket.so_1fcNkoDIWK0'
