@@ -2,6 +2,7 @@
 #include "LDCpoissonSolver_Banded.h"
 #include "LDCpoissonSolver_CGS.h"
 #include <iostream>
+#include <cstring>
 #include <fstream>
 #include <mpi.h>
 
