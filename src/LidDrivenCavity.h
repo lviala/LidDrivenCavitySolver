@@ -39,7 +39,7 @@ public:
     // IO Methods
     void PrintArray(const char* varStr, int rank);
     void LDCStatus(int rank);
-    void LDCPrintSolution2File(string filename);
+    void LDCPrintSolution2File(string filename, const double& wallTime);
 
 private:
     // MEMBER CLASSES

@@ -78,6 +78,10 @@ int main(int argc, char **argv)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE SUBDOMAIN
 
+    // Timing execution time
+    double tStart, tEnd; 
+    tStart = MPI_Wtime(); 
+
     // Initialize cartesian grid communicator
     MPI_Comm cartGrid;
     int periods[2] = {0, 0}, coords[2];
@@ -96,25 +100,39 @@ int main(int argc, char **argv)
     mngMPI::splitGrid(gridSize, partitionSize, coords, subGridSize, xStep, yStep, subPos);
 
     // Create a new instance of the LidDrivenCavity class
-    LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD, rank, rankShift, coords, subGridSize, timeStep, xStep, yStep, subPos, finalTime, reynoldsNumber);
+    LidDrivenCavity* solver = new LidDrivenCavity(MPI_COMM_WORLD,
+                                                rank, rankShift,
+                                                coords, subGridSize,
+                                                timeStep, xStep, yStep,
+                                                subPos, finalTime, reynoldsNumber);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// SOLVE PROBLEM
 
     // Initialize solver
     solver->Initialise();
 
     // Run the solver
     solver->Solve();
+    
+    // End Time 
+    tEnd = MPI_Wtime(); 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// OUTPUT SOLUTION AND EXIT
 
     // Output solution to file
     string resultsOutputPath;
     resultsOutputPath = string("results/LDCoutput") + 
                         string("_Lx_") + to_string(int(domainSize[1])) + string("_Ly_") + to_string(int(domainSize[0])) + 
                         string("_Nx_") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) + 
+                        string("_Px_") + to_string(partitionSize[1]) + string("_Py_") + to_string(partitionSize[0]) + 
                         string("_T_") + to_string(int(finalTime)) + 
                         string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
 
     cout << "File output to: " << resultsOutputPath << endl;
 
-    solver->LDCPrintSolution2File(resultsOutputPath);
+    solver->LDCPrintSolution2File(resultsOutputPath, (tEnd - tStart));
 
     // Cleanup on program exit
     delete solver;

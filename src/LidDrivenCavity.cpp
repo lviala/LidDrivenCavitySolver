@@ -422,7 +422,7 @@ extern "C" {
         }
     }
 
-    void LidDrivenCavity::LDCPrintSolution2File(string filename){
+    void LidDrivenCavity::LDCPrintSolution2File(string filename, const double& wallTime){
         // Sequentially write solution to csv file
         // Every process opens, writes into, and closes file
         // Only one process can have the file open at one time
@@ -446,6 +446,8 @@ extern "C" {
                 ofstream vOut(filename, ios::out | ios::trunc);
 
                 // Write Header
+                vOut << "Np" << "," << "Wall-time"  << endl;  
+                vOut << size << "," << wallTime << endl;
                 vOut << "x" << "," << "y" << "," << "s" << "," << "v" << "," << "velU" << "," << "velV" << endl;
 
                 // (x,y) coordinates of current point
