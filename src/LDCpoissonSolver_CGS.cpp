@@ -159,6 +159,11 @@ extern "C" {
         MPI_Allreduce(MPI_IN_PLACE, &dotR_prev, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
         /////////////// ITERATE
+
+        // Set convergence criteria
+        int iter_max = 1000; // Adjust as needed
+        double res_crit = 0.00001; // Adjust as needed
+
         while (true){
 
             // Update iteration count
@@ -190,9 +195,6 @@ extern "C" {
             MPI_Allreduce(MPI_IN_PLACE, &dotR, 1, MPI_DOUBLE, MPI_SUM, MPIcomm);
 
             // Check convergence and max iteration criteria
-            int iter_max = 1000; // Adjust as needed
-            double res_crit = 0.0000001; // Adjust as needed
-
             if (k > iter_max || dotR < res_crit){
                 break;
             }
