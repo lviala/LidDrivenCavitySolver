@@ -162,7 +162,7 @@ extern "C" {
 
         // Set convergence criteria
         int iter_max = 1000; // Adjust as needed
-        double res_crit = 0.00001; // Adjust as needed
+        double res_crit = 0.0000001; // Adjust as needed
 
         while (true){
 
