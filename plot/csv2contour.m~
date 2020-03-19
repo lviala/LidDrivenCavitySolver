@@ -1,6 +1,6 @@
 clear
 clc
-%close all
+close all
 
 filename = '../results/LDCoutput_Lx_1_Ly_1_Nx_161_Ny_161_T_100_Re_100.csv';
 Nx = 161;
@@ -13,9 +13,13 @@ A = sortrows(A,[1 2]);
 
 %% STAT
 
-[minS , id_minS] = min(S);
-disp(['Re 100: X = ' num2str(X(id_minS)),'Y = ' num2str(Y(id_minS)),...
-        'S = ' num2str(S(id_minS)) ])
+expression = 'Re_(\d+).';
+reynolds = regexp(filename,expression,'tokens');
+[minS , id_minS] = min(A(:,3));
+disp(['Re ', char(reynolds{1}), ...
+    ': X = ' num2str(A(id_minS,1)),...
+    ', Y = ' num2str(A(id_minS,2)),...
+    ', S = ' num2str(A(id_minS,3)) ])
 
 %% RESHAPE TO MESHGRID FORMAT
 
@@ -28,7 +32,7 @@ velV    = reshape(A(:,6),Ny,Nx);
 
 %% PLOT
 
-figure();
+figure(1);
 subplot(2,2,1)
 contourf(X,Y,S);
 title('Lid driven cavity problem - streamfuntion contour')
@@ -56,3 +60,20 @@ title('Lid driven cavity problem - V velocity')
 xlabel('x')
 ylabel('y')
 colorbar()
+
+figure(2)
+[C,h] = contour(X,Y,S,[linspace(-.10,0,11),-1e-2, -1e-4, 1e-7, 1e-6, 1e-5],'LineColor','k');
+title('Streamfuntion Contour - Re = 100','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
+xlabel('x','interpreter','latex')
+ylabel('y','interpreter','latex')
+clabel(C,h,-.10:-.02,6))
+print(gcf,'Stream_Re100.png','-dpng','-r300');
+
+figure(3)
+contour(X,Y,V,linspace(-5,5,11),'LineColor','k');
+title('Vorticity Contour - Re = 100','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
+xlabel('x','interpreter','latex')
+ylabel('y','interpreter','latex')
+print(gcf,'Vort_Re100.png','-dpng','-r300');
