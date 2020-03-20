@@ -71,27 +71,27 @@ for ii = 1:length(filenames)
     %% PLOT VELOCITY SLICES
     figure(length(filenames)+1)
     hold on
-    idx = find(Y == 0.5);
-    plot(X(idx),velU(idx),LineStyleOrder{ii});
+    idx = find(X == 0.5);
+    plot(Y(idx),velU(idx),LineStyleOrder{ii});
     
     figure(length(filenames)+2)
     hold on
-    idx = find(X == 0.5);
-    plot(Y(idx),velV(idx),LineStyleOrder{ii});
+    idx = find(Y == 0.5);
+    plot(X(idx),velV(idx),LineStyleOrder{ii});
 end
 
 figure(length(filenames)+1)
-title('Horizontal velocity along the line y=0.5','interpreter','latex');
-xlabel('x','interpreter','latex')
+title('Horizontal velocity along the line x=0.5','interpreter','latex');
+xlabel('y','interpreter','latex')
 ylabel('u','interpreter','latex')
 set(gca,'TickLabelInterpreter','latex')
-legend('Re=100','Re=400','Re=1000','Re=3200','interpreter','latex')
+legend('Re=100','Re=400','Re=1000','Re=3200','interpreter','latex','location','northwest')
 print(gcf,'Uvel_x0p5.png','-dpng','-r300');
 
 figure(length(filenames)+2)
-title('Vertical velocity along the line x=0.5','interpreter','latex');
-xlabel('y','interpreter','latex')
+title('Vertical velocity along the line y=0.5','interpreter','latex');
+xlabel('x','interpreter','latex')
 ylabel('v','interpreter','latex')
 set(gca,'TickLabelInterpreter','latex')
-legend('Re=100','Re=400','Re=1000','Re=3200','interpreter','latex','location','northwest')
+legend('Re=100','Re=400','Re=1000','Re=3200','interpreter','latex')
 print(gcf,'Vvel_y0p5.png','-dpng','-r300');

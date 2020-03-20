@@ -2,3 +2,12 @@
 .vscode/
 initial.er/
 LidDrivenCavitySolver
+plot/Stream_Lx2_Re100.png
+plot/Stream_Ly2_Re100.png
+plot/Stream_Re100.png
+plot/Uvel_x0p5.png
+plot/Vort_Lx2_Re100.png
+plot/Vort_Ly2_Re100.png
+plot/Vort_Re100.png
+plot/vort_text_handles.mat
+plot/Vvel_y0p5.png

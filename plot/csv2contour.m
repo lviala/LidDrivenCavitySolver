@@ -2,7 +2,7 @@ clear
 clc
 close all
 
-filename = '../results/LDCoutput_Lx_1_Ly_1_Nx_161_Ny_161_T_100_Re_100.csv';
+filename = '../results/LDCoutput_Lx_1_Ly_2_Nx_161_Ny_161_T_100_Re_100.csv';
 Nx = 161;
 Ny = 161;
 
@@ -68,14 +68,14 @@ set(gca,'TickLabelInterpreter','latex')
 xlabel('x','interpreter','latex')
 ylabel('y','interpreter','latex')
 clabel(C1,h1,-.10:.02:-.02,'interpreter','latex')
-print(gcf,'Stream_Re100.png','-dpng','-r300');
+%print(gcf,'Stream_Ly2_Re100.png','-dpng','-r300');
 
 figure(3)
 [C2,h2] = contour(X,Y,V,linspace(-5,5,11),'LineColor','k');
-clabel(C2,h2,[-4:2:4],'labelspacing', 5000,'interpreter','latex');
+t = clabel(C2,h2,'manual','interpreter','latex');
 title('Vorticity Contour - Re = 100','interpreter','latex')
 set(gca,'TickLabelInterpreter','latex')
 xlabel('x','interpreter','latex')
 ylabel('y','interpreter','latex')
-print(gcf,'Vort_Re100.png','-dpng','-r300');
+%print(gcf,'Vort_Ly2_Re100.png','-dpng','-r300');
 
