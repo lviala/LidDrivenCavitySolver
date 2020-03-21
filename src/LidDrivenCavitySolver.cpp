@@ -73,14 +73,14 @@ int main(int argc, char **argv)
         MPI_Finalize();
         return 0;
     }
-    
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // INITIALIZE SUBDOMAIN
 
     // Timing execution time
-    double tStart, tEnd; 
-    tStart = MPI_Wtime(); 
+    double tStart, tEnd;
+    tStart = MPI_Wtime();
 
     // Initialize cartesian grid communicator
     MPI_Comm cartGrid;
@@ -114,20 +114,20 @@ int main(int argc, char **argv)
 
     // Run the solver
     solver->Solve();
-    
-    // End Time 
-    tEnd = MPI_Wtime(); 
+
+    // End Time
+    tEnd = MPI_Wtime();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // OUTPUT SOLUTION AND EXIT
 
     // Output solution to file
     string resultsOutputPath;
-    resultsOutputPath = string("results/LDCoutput") + 
-                        string("_Lx_") + to_string(int(domainSize[1])) + string("_Ly_") + to_string(int(domainSize[0])) + 
-                        string("_Nx_") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) + 
-                        string("_Px_") + to_string(partitionSize[1]) + string("_Py_") + to_string(partitionSize[0]) + 
-                        string("_T_") + to_string(int(finalTime)) + 
+    resultsOutputPath = string("results/LDCoutput") +
+                        string("_Lx_") + to_string(int(domainSize[1])) + string("_Ly_") + to_string(int(domainSize[0])) +
+                        string("_Nx_") + to_string(gridSize[1]) + string("_Ny_") + to_string(gridSize[0]) +
+                        string("_Px_") + to_string(partitionSize[1]) + string("_Py_") + to_string(partitionSize[0]) +
+                        string("_T_") + to_string(int(finalTime)) +
                         string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
 
     cout << "File output to: " << resultsOutputPath << endl;

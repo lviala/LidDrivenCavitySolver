@@ -14,10 +14,10 @@ extern "C" {
     double F77NAME(dcopy) (const int& n,
                           const double *x, const int& incx,
                           const double *y, const int& incy);
-    
+
     // Norm2 of vector
     double F77NAME(dnrm2) (const int& n, const double* x, const int& incx);
-    
+
     // Y = alpha*X + Y
     double F77NAME(daxpy) (const int& n, const double& alpha,
                           const double *x, const int& incx,
@@ -57,9 +57,9 @@ extern "C" {
 
     LidDrivenCavity::~LidDrivenCavity()
     {
-        delete[] v;
-        delete[] v_new;
-        delete[] s;
+        // delete[] v;
+        // delete[] v_new;
+        // delete[] s;
         delete[] velU;
         delete[] velV;
         delete[] bufNx;
@@ -173,7 +173,7 @@ extern "C" {
 
         // Set lid top velocity
         if (rankShift[1] == -2){
-            for (int i = 0; i < Nx ; i++){
+            for (int i = 1; i < Nx ; i++){
                 velU[i*Ny - 1] = this -> U;
             }
         }
@@ -183,7 +183,7 @@ extern "C" {
 
         // Initialize poisson solver object
         // Builds coefficient matrix and other necessary variables
-            
+
         poissonSolver = new LDCpoissonSolver_CGS(rank, rankShift, MPIcomm);
         poissonSolver -> Initialize(Nx, Ny, coeff);
 
@@ -236,7 +236,7 @@ extern "C" {
 
         // Add the value of v to v_new
         F77NAME(daxpy) (Nx*Ny -2, 1.0, &v[1], 1, &v_new[1], 1);
-        
+
         // Copy the values of v_new to v to preserve BCs
         F77NAME(dcopy)(Ny*Nx, v_new, 1, v, 1);
     }
@@ -446,7 +446,7 @@ extern "C" {
                 ofstream vOut(filename, ios::out | ios::trunc);
 
                 // Write Header
-                vOut << "Np" << "," << "Wall-time"  << endl;  
+                vOut << "Np" << "," << "Wall-time"  << endl;
                 vOut << size << "," << wallTime << endl;
                 vOut << "x" << "," << "y" << "," << "s" << "," << "v" << "," << "velU" << "," << "velV" << endl;
 
