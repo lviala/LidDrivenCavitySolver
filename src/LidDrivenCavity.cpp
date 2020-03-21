@@ -57,9 +57,9 @@ extern "C" {
 
     LidDrivenCavity::~LidDrivenCavity()
     {
-        // delete[] v;
-        // delete[] v_new;
-        // delete[] s;
+        delete[] v;
+        delete[] v_new;
+        delete[] s;
         delete[] velU;
         delete[] velV;
         delete[] bufNx;
