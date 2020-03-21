@@ -130,7 +130,9 @@ int main(int argc, char **argv)
                         string("_T_") + to_string(int(finalTime)) +
                         string("_Re_") + to_string(int(reynoldsNumber)) + string(".csv");
 
-    cout << "File output to: " << resultsOutputPath << endl;
+    if (rank == 0){
+        cout << "File output to: " << resultsOutputPath << endl;
+    }
 
     solver->LDCPrintSolution2File(resultsOutputPath, (tEnd - tStart));
 
